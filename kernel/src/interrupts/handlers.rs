@@ -33,3 +33,7 @@ pub extern "x86-interrupt" fn double_fault_handler(frame: InterruptStackFrame, _
 pub extern "x86-interrupt" fn gen_protection_fault(frame: InterruptStackFrame, _err: u32) {
     panic!("EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}", frame);
 }
+
+pub extern "x86-interrupt" fn sbrk(frame: InterruptStackFrame, _err: u32) {
+    panic!("TRAP: SBRK SYSCALL\n{:#?}", frame);
+}

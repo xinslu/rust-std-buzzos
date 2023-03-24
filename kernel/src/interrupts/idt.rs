@@ -29,7 +29,11 @@ impl<F> Gate<F> {
         self.fn_addr_low = addr as u16;
         self.fn_addr_high = (addr >> 16) as u16;
         self.segment_selector = 0x8;
-        self.flags |= GateFlags::PRESENT as u8;
+        if isTrap {
+            self.flags = GateFlags::TRAPGATE as u8;
+        } else {
+            self.flags |= GateFlags::PRESENT as u8;
+        }
         &mut self.flags
     }
 }
@@ -55,6 +59,14 @@ impl Gate<PageFaultHandler> {
     pub fn set_handler_fn(&mut self, handler: PageFaultHandler) {
         let handler = handler as u32;
         unsafe { self.set_handler_addr(handler) };
+    }
+}
+
+impl Gate<SbrkTrapHandler> {
+    #[inline]
+    pub fn set_handler_fn(&mut self, handler: SbrkTrapHandler) {
+        let handler = handler as u32;
+        unsafe { self.set_handler_addr(handler, true) };
     }
 }
 
@@ -92,6 +104,7 @@ impl IDT {
             vmm_communication_exception: Gate::empty(),
             security_exception: Gate::empty(),
             reserved_3: Gate::empty(),
+            sys_sbrk: Gate::empty(),
             gp_interrupts: [Gate::empty(); 256 - 32],
         }
     }
@@ -126,6 +139,7 @@ lazy_static! {
         global_idt.page_fault.set_handler_fn(page_fault);
         global_idt.overflow.set_handler_fn(overflow);
         global_idt.bound_range_exceeded.set_handler_fn(bound_range);
+        global_idt.sys_sbrk.set_handler_fn(sbrk); 
         global_idt
     };
 }
