@@ -58,3 +58,28 @@ pub fn uart_put_char(c: char) -> Result<(), ()> {
 
     Ok(())
 }
+
+pub fn uart_read_char() -> Result<char, ()>{ 
+    // UART safety check
+    if *IS_UART_ENABLED.lock() == false {
+        return Err(());
+    }
+
+    // Serial needs to be ready. Waits for status line to be ready before
+    // sending a character.
+    let mut ready = false; 
+    for _ in 0..128 {
+        ready = (inb(COM1 + 5) & 0x1) > 0;
+        if ready {
+            break;
+        }
+    }
+    
+    if !ready {
+        return Err(());
+    }
+
+    let c = inb(COM1 + 0) as char;
+    return Ok(c);
+
+}
