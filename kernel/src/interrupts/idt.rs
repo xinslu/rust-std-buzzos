@@ -25,11 +25,11 @@ impl<F> Gate<F> {
 
     // Set gate handler. Accepts the 64-bits address of the handler function
     #[inline]
-    pub unsafe fn set_handler_addr(&mut self, addr: u32) -> &mut u8 {
+    pub unsafe fn set_handler_addr(&mut self, addr: u32, is_trap: bool) -> &mut u8 {
         self.fn_addr_low = addr as u16;
         self.fn_addr_high = (addr >> 16) as u16;
         self.segment_selector = 0x8;
-        if isTrap {
+        if is_trap {
             self.flags = GateFlags::TRAPGATE as u8;
         } else {
             self.flags |= GateFlags::PRESENT as u8;
@@ -42,7 +42,7 @@ impl Gate<InterruptHandler> {
     #[inline]
     pub fn set_handler_fn(&mut self, handler: InterruptHandler) {
         let handler = handler as u32;
-        unsafe { self.set_handler_addr(handler) };
+        unsafe { self.set_handler_addr(handler, false) };
     }
 }
 
@@ -50,7 +50,7 @@ impl Gate<InterruptHandlerWithErr> {
     #[inline]
     pub fn set_handler_fn(&mut self, handler: InterruptHandlerWithErr) {
         let handler = handler as u32;
-        unsafe { self.set_handler_addr(handler) };
+        unsafe { self.set_handler_addr(handler, false) };
     }
 }
 
@@ -58,7 +58,7 @@ impl Gate<PageFaultHandler> {
     #[inline]
     pub fn set_handler_fn(&mut self, handler: PageFaultHandler) {
         let handler = handler as u32;
-        unsafe { self.set_handler_addr(handler) };
+        unsafe { self.set_handler_addr(handler, false) };
     }
 }
 
