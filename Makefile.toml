@@ -57,9 +57,20 @@ script = [
     "rm build/kernel.a build/entry.o"
 ]
 
+[tasks.build_std]
+dependencies = ["clean"]
+workspace = false
+script = [
+    "cd libstd-buzzos",
+
+    # Compile stdlib and move to build Kernel
+    "RUSTFLAGS=-g cargo build --target x86-target.json -Z build-std=core",
+    
+]
+
 # Build bootloader asm files
 [tasks.build_run]
-dependencies = ["build_kernel", "build_bootloader"]
+dependencies = ["build_kernel", "build_bootloader", "build_std"]
 workspace = false
 script = [
     # Generate disk image
@@ -74,7 +85,7 @@ script = [
 
 # Build bootloader asm files
 [tasks.gdb]
-dependencies = ["build_kernel", "build_bootloader"]
+dependencies = ["build_kernel", "build_bootloader", "build-std"]
 workspace = false
 script = [
     # Generate disk image
