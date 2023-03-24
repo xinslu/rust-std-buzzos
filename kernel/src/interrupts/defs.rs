@@ -69,7 +69,7 @@ pub struct IDT {
 
     /// Those can be defined by the OS (Notice 0 to 31 are already used by the processor)
     pub sys_sbrk: Gate<SbrkTrapHandler>,
-    pub gp_interrupts: [Gate<InterruptHandler>; 256 - 32],
+    pub gp_interrupts: [Gate<InterruptHandler>; 256 - 33],
 }
 
 /// Gate Flags. Those allow fine grain control of how and when should traps/interrupts be issued.

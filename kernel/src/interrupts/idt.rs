@@ -31,9 +31,8 @@ impl<F> Gate<F> {
         self.segment_selector = 0x8;
         if is_trap {
             self.flags = GateFlags::TRAPGATE as u8;
-        } else {
-            self.flags |= GateFlags::PRESENT as u8;
         }
+        self.flags |= GateFlags::PRESENT as u8;
         &mut self.flags
     }
 }
@@ -105,7 +104,7 @@ impl IDT {
             security_exception: Gate::empty(),
             reserved_3: Gate::empty(),
             sys_sbrk: Gate::empty(),
-            gp_interrupts: [Gate::empty(); 256 - 32],
+            gp_interrupts: [Gate::empty(); 256 - 33],
         }
     }
 

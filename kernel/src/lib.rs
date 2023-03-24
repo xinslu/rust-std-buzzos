@@ -14,10 +14,14 @@ pub mod structures;
 pub mod threading;
 pub mod x86;
 
+use core::panic::PanicInfo;
+use std_buzzos;
+
 extern crate alloc;
 
+use core::arch::asm;
+
 // Interface definition of panic in Rust. Core represents the core library
-use core::panic::PanicInfo;
 
 // Uses C calling convention instead of Rust. no_mangle removes name mangling when compiled.
 // _start is the default entry point for most systems. Function is diverging as the Kernel should
@@ -35,6 +39,7 @@ pub unsafe extern "C" fn _start() -> ! {
 
     // Setup Interrupts
     interrupts::idt::setup_idt();
+
 
     loop {}
 }

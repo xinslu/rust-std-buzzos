@@ -1,7 +1,7 @@
 use core::arch::asm;
 
 use crate::{
-    interrupts::defs::InterruptDescriptorTablePointer, memory::defs::GlobalDescriptorTablePointer,
+    interrupts::defs::InterruptDescriptorTablePointer, memory::defs::GlobalDescriptorTablePointer, println
 };
 
 // ******** Control Registers ********
@@ -17,6 +17,7 @@ pub fn lcr3(page_dir: usize) {
 
 #[inline]
 pub fn lidt(idt: &InterruptDescriptorTablePointer) {
+    println!("{:#?}", idt);
     unsafe {
         asm!("lidt [{}]", in(reg) idt, options(readonly, nostack, preserves_flags));
     }
