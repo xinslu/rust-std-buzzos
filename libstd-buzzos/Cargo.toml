@@ -1,0 +1,12 @@
+[package]
+name = "std-buzzos"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+volatile = "0.2.6" # Volatile allows finer grain control of the compiler
+
+[lib]
+crate-type = ["dylib", "rlib"]
