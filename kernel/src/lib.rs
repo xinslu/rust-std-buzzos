@@ -36,7 +36,6 @@ pub unsafe extern "C" fn _start() -> ! {
     memory::vm::setup_vm();
     memory::gdt::setup_gdt();
     memory::heap::setup_heap();
-
     // Setup Interrupts
     interrupts::idt::setup_idt();
 
