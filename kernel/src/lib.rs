@@ -40,6 +40,8 @@ pub unsafe extern "C" fn _start() -> ! {
     // Setup Interrupts
     interrupts::idt::setup_idt();
 
+    std_buzzos::testing::test_syscall();
+
 
     loop {}
 }
