@@ -123,7 +123,7 @@ pub type InterruptHandler = extern "x86-interrupt" fn(InterruptStackFrame);
 pub type InterruptHandlerWithErr = extern "x86-interrupt" fn(InterruptStackFrame, error_code: u32);
 pub type PageFaultHandler =
     extern "x86-interrupt" fn(InterruptStackFrame, error_code: PageFaultErr);
-pub type SbrkTrapHandler = extern "x86-interrupt" fn(InterruptStackFrame, error_code: u16);
+pub type SbrkTrapHandler = fn(InterruptStackFrame, error_code: u16);
 // Page Faults have more information regarding how and where it happened. Must be handled
 // different than other gates.
 bitflags! {

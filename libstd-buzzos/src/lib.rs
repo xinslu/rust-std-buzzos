@@ -11,11 +11,11 @@ pub mod testing {
     use crate::syscalls;
     pub unsafe fn test_syscall() {
         let res: usize = syscalls::syscall1(syscalls::Sysno::Sbrk, 10);
-        let mut output: usize = 0;
-        asm!(
-            "mov {}, edx",
-            out(reg) output,
-        );
-        panic!("Output: {:#?}", output); 
+        // let mut output: usize = 0;
+        // asm!(
+        //     "mov {}, edx",
+        //     out(reg) output,
+        // );
+        // panic!("Output: {:#?}", output); 
     }
 }

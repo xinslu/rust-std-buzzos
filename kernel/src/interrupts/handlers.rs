@@ -3,9 +3,6 @@ use crate::{println, memory::{heap::HEAP_ALLOCATOR, defs::LinkedListAllocator}};
 use super::defs::{InterruptStackFrame, PageFaultErr};
 use core::arch::asm;
 
-// #![feature(Alignment)]
-// use core::ptr::Alignment;
-
 pub extern "x86-interrupt" fn div_by_zero_handler(frame: InterruptStackFrame) {
     println!("EXCEPTION: DIVISION BY ZERO\n{:#?}", frame);
 }
@@ -15,7 +12,15 @@ pub extern "x86-interrupt" fn breakpoint_handler(frame: InterruptStackFrame) {
 }
 
 pub extern "x86-interrupt" fn page_fault(frame: InterruptStackFrame, _error_code: PageFaultErr) {
-    println!("EXCEPTION: PAGE FAULT\n{:#?}", frame);
+    let addr: u32;
+    unsafe {
+        asm!(
+            "mov {}, cr2",
+            out(reg) addr,
+        );
+    };
+    println!("Page Fault at virtual address {:#x?}", addr);
+    panic!("EXCEPTION: PAGE FAULT\n{:#?}", frame);
 }
 
 pub extern "x86-interrupt" fn non_maskable(frame: InterruptStackFrame) {
@@ -38,7 +43,7 @@ pub extern "x86-interrupt" fn gen_protection_fault(frame: InterruptStackFrame, _
     panic!("EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}", frame);
 }
 
-pub extern "x86-interrupt" fn sbrk(frame: InterruptStackFrame, _err: u16) {
+pub fn sbrk(frame: InterruptStackFrame, _err: u16) {
     let mut res: usize = 0;
     
     unsafe {
@@ -52,7 +57,7 @@ pub extern "x86-interrupt" fn sbrk(frame: InterruptStackFrame, _err: u16) {
     println!("{}", res);
     match Layout::from_size_align(res, 4) {
         Ok(x) => layout = x, 
-        Err(y) => panic!("{}", y)
+        Err(y) => panic!("Layou Error: {}", y)
     };
 
     let mem_break: *mut u8;
@@ -67,7 +72,7 @@ pub extern "x86-interrupt" fn sbrk(frame: InterruptStackFrame, _err: u16) {
                 in(reg) -1,
             );
         };
-        panic!("TRAP: SBRK SYSCALL got no free memory\n");
+        println!("TRAP: SBRK SYSCALL got no free memory\n");
     }
     unsafe {
         asm!(
@@ -75,6 +80,6 @@ pub extern "x86-interrupt" fn sbrk(frame: InterruptStackFrame, _err: u16) {
             in(reg) mem_break,
         );
     };
-    panic!("TRAP: SBRK SYSCALL got {:#?} bytes! \n", res);
+    println!("TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?} \n", res, mem_break);
 
 }
