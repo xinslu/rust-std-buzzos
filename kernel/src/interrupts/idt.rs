@@ -61,9 +61,9 @@ impl Gate<PageFaultHandler> {
     }
 }
 
-impl Gate<SbrkTrapHandler> {
+impl Gate<TrapHandler> {
     #[inline]
-    pub fn set_handler_fn(&mut self, handler: SbrkTrapHandler) {
+    pub fn set_handler_fn(&mut self, handler: TrapHandler) {
         let handler = handler as u32;
         unsafe { self.set_handler_addr(handler, true) };
     }
@@ -104,7 +104,9 @@ impl IDT {
             security_exception: Gate::empty(),
             reserved_3: Gate::empty(),
             sys_sbrk: Gate::empty(),
-            gp_interrupts: [Gate::empty(); 256 - 33],
+            sys_read: Gate::empty(),
+            sys_write: Gate::empty(),
+            gp_interrupts: [Gate::empty(); 256 - 35],
         }
     }
 
@@ -139,6 +141,9 @@ lazy_static! {
         global_idt.overflow.set_handler_fn(overflow);
         global_idt.bound_range_exceeded.set_handler_fn(bound_range);
         global_idt.sys_sbrk.set_handler_fn(sbrk); 
+        global_idt.sys_read.set_handler_fn(read); 
+        global_idt.sys_write.set_handler_fn(write); 
+
         global_idt
     };
 }

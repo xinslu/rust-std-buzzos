@@ -68,8 +68,10 @@ pub struct IDT {
     pub reserved_3: Gate<InterruptHandler>,
 
     /// Those can be defined by the OS (Notice 0 to 31 are already used by the processor)
-    pub sys_sbrk: Gate<SbrkTrapHandler>,
-    pub gp_interrupts: [Gate<InterruptHandler>; 256 - 33],
+    pub sys_sbrk: Gate<TrapHandler>,
+    pub sys_read: Gate<TrapHandler>,
+    pub sys_write: Gate<TrapHandler>,
+    pub gp_interrupts: [Gate<InterruptHandler>; 256 - 35],
 }
 
 /// Gate Flags. Those allow fine grain control of how and when should traps/interrupts be issued.
@@ -123,7 +125,7 @@ pub type InterruptHandler = extern "x86-interrupt" fn(InterruptStackFrame);
 pub type InterruptHandlerWithErr = extern "x86-interrupt" fn(InterruptStackFrame, error_code: u32);
 pub type PageFaultHandler =
     extern "x86-interrupt" fn(InterruptStackFrame, error_code: PageFaultErr);
-pub type SbrkTrapHandler = fn(InterruptStackFrame, error_code: u16);
+pub type TrapHandler = fn(InterruptStackFrame, error_code: u16);
 // Page Faults have more information regarding how and where it happened. Must be handled
 // different than other gates.
 bitflags! {

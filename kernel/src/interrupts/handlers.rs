@@ -83,3 +83,11 @@ pub fn sbrk(frame: InterruptStackFrame, _err: u16) {
     println!("TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?} \n", res, mem_break);
 
 }
+
+pub fn read(frame: InterruptStackFrame, _err: u16) {
+    panic!("TRAP: SYSREAD\n{:#?}", frame);
+}
+
+pub fn write(frame: InterruptStackFrame, _err: u16) {
+    panic!("TRAP: SYSWRITE\n{:#?}", frame);
+}

@@ -41,7 +41,7 @@ pub unsafe extern "C" fn _start() -> ! {
 
     std_buzzos::testing::test_syscall();
 
-
+    
     loop {}
 }
 
