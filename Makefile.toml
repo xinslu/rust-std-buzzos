@@ -85,7 +85,7 @@ script = [
 
 # Build bootloader asm files
 [tasks.gdb]
-dependencies = ["build_kernel", "build_bootloader", "build-std"]
+dependencies = ["build_kernel", "build_bootloader", "build_std"]
 workspace = false
 script = [
     # Generate disk image
