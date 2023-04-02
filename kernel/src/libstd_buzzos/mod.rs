@@ -8,10 +8,11 @@ pub mod syscalls;
 
 pub mod testing {
     use crate::interrupts;
-    pub unsafe fn test_syscall() {
-        let addr: *mut u8 = interrupts::handlers::sbrk(10);
-        interrupts::handlers::read();
-        interrupts::handlers::write();
 
+    use super::syscalls::{syscall1, syscall0, Sysno};
+    pub unsafe fn test_syscall() {
+        syscall1(Sysno::Sbrk, 10);
+        syscall0(Sysno::Read);
+        syscall0(Sysno::Write);
     }
 }
