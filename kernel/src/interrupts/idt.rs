@@ -140,9 +140,6 @@ lazy_static! {
         global_idt.page_fault.set_handler_fn(page_fault);
         global_idt.overflow.set_handler_fn(overflow);
         global_idt.bound_range_exceeded.set_handler_fn(bound_range);
-        global_idt.sys_sbrk.set_handler_fn(sbrk); 
-        global_idt.sys_read.set_handler_fn(read); 
-        global_idt.sys_write.set_handler_fn(write); 
 
         global_idt
     };

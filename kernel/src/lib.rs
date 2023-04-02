@@ -13,13 +13,11 @@ pub mod misc;
 pub mod structures;
 pub mod threading;
 pub mod x86;
+pub mod libstd_buzzos;
 
 use core::panic::PanicInfo;
-use std_buzzos;
 
 extern crate alloc;
-
-use core::arch::asm;
 
 // Interface definition of panic in Rust. Core represents the core library
 
@@ -36,12 +34,10 @@ pub unsafe extern "C" fn _start() -> ! {
     memory::vm::setup_vm();
     memory::gdt::setup_gdt();
     memory::heap::setup_heap();
-    // Setup Interrupts
     interrupts::idt::setup_idt();
 
-    std_buzzos::testing::test_syscall();
+    libstd_buzzos::testing::test_syscall();
 
-    
     loop {}
 }
 

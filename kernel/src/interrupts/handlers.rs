@@ -40,24 +40,16 @@ pub extern "x86-interrupt" fn double_fault_handler(frame: InterruptStackFrame, _
 }
 
 pub extern "x86-interrupt" fn gen_protection_fault(frame: InterruptStackFrame, _err: u32) {
-    panic!("EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}", frame);
+    panic!("EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}, error code: {_err:#b}", frame);
 }
 
-pub fn sbrk(frame: InterruptStackFrame, _err: u16) {
-    let mut res: usize = 0;
-    
-    unsafe {
-        asm!(
-            "mov {}, edx",
-            out(reg) res,
-        );
-    };
+pub fn sbrk(res: usize) -> *mut u8 {
 
     let layout: Layout;
     println!("{}", res);
     match Layout::from_size_align(res, 4) {
         Ok(x) => layout = x, 
-        Err(y) => panic!("Layou Error: {}", y)
+        Err(y) => panic!("Layout Error: {}", y)
     };
 
     let mem_break: *mut u8;
@@ -80,14 +72,14 @@ pub fn sbrk(frame: InterruptStackFrame, _err: u16) {
             in(reg) mem_break,
         );
     };
-    println!("TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?} \n", res, mem_break);
-
+    println!("TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}", res, mem_break);
+    mem_break
 }
 
-pub fn read(frame: InterruptStackFrame, _err: u16) {
-    panic!("TRAP: SYSREAD\n{:#?}", frame);
+pub fn read() {
+    println!("TRAP: SYSREAD");
 }
 
-pub fn write(frame: InterruptStackFrame, _err: u16) {
-    panic!("TRAP: SYSWRITE\n{:#?}", frame);
+pub fn write() {
+    println!("TRAP: SYSWRITE");
 }

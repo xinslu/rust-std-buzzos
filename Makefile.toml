@@ -70,7 +70,7 @@ script = [
 
 # Build bootloader asm files
 [tasks.build_run]
-dependencies = ["build_kernel", "build_bootloader", "build_std"]
+dependencies = ["build_kernel", "build_bootloader"]
 workspace = false
 script = [
     # Generate disk image
@@ -85,7 +85,7 @@ script = [
 
 # Build bootloader asm files
 [tasks.gdb]
-dependencies = ["build_kernel", "build_bootloader", "build_std"]
+dependencies = ["build_kernel", "build_bootloader"]
 workspace = false
 script = [
     # Generate disk image
