@@ -1,4 +1,4 @@
-use core::{alloc::{GlobalAlloc, Layout}};
+use core::{alloc::{GlobalAlloc, Layout}, ffi::c_void};
 use crate::{println, memory::{heap::HEAP_ALLOCATOR, defs::LinkedListAllocator}};
 use super::defs::{InterruptStackFrame, PageFaultErr};
 use core::arch::asm;
@@ -19,7 +19,7 @@ pub extern "x86-interrupt" fn page_fault(frame: InterruptStackFrame, _error_code
             out(reg) addr,
         );
     };
-    println!("Page Fault at virtual address {:#x?}", addr);
+    println!("Page Fault at virtual addreq_sizes {:#x?}", addr);
     panic!("EXCEPTION: PAGE FAULT\n{:#?}", frame);
 }
 
@@ -43,16 +43,15 @@ pub extern "x86-interrupt" fn gen_protection_fault(frame: InterruptStackFrame, _
     panic!("EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}, error code: {_err:#b}", frame);
 }
 
-pub fn sbrk(res: usize) -> *mut u8 {
-
+pub fn sbrk(req_size: usize, mut mem_break: *mut u8) -> usize {
+    let mut res: usize = 0;
     let layout: Layout;
-    println!("{}", res);
-    match Layout::from_size_align(res, 4) {
+    println!("{}", req_size);
+    match Layout::from_size_align(req_size, 4) {
         Ok(x) => layout = x, 
         Err(y) => panic!("Layout Error: {}", y)
     };
 
-    let mem_break: *mut u8;
     unsafe {
         mem_break = HEAP_ALLOCATOR.alloc(layout);
     };
@@ -65,6 +64,7 @@ pub fn sbrk(res: usize) -> *mut u8 {
             );
         };
         println!("TRAP: SBRK SYSCALL got no free memory\n");
+        return res;
     }
     unsafe {
         asm!(
@@ -72,14 +72,27 @@ pub fn sbrk(res: usize) -> *mut u8 {
             in(reg) mem_break,
         );
     };
-    println!("TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}", res, mem_break);
-    mem_break
+    println!("TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}", req_size, mem_break);
+    res = 1;
+    res
 }
 
-pub fn read() {
+pub fn read(fd: usize, buf: *mut c_void, count: usize) -> usize {
+    let mut res: usize = 0;
+    if count == 0 {
+        res = 1;
+        return res;
+    }
     println!("TRAP: SYSREAD");
+    res
 }
 
-pub fn write() {
+pub fn write(fd: usize, buf: *const c_void, count: usize) -> usize {
+    let mut res: usize = 0;
+    if count == 0 {
+        res = 1;
+        return res;
+    }
     println!("TRAP: SYSWRITE");
+    res
 }

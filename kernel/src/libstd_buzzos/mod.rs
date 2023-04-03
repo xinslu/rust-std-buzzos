@@ -9,10 +9,11 @@ pub mod syscalls;
 pub mod testing {
     use crate::interrupts;
 
-    use super::syscalls::{syscall1, syscall0, Sysno};
+    use super::syscalls::{syscall2, syscall3, Sysno};
     pub unsafe fn test_syscall() {
-        syscall1(Sysno::Sbrk, 10);
-        syscall0(Sysno::Read);
-        syscall0(Sysno::Write);
+        let mut mem_break = 0;
+        syscall2(Sysno::Sbrk, 10, mem_break);
+        syscall3(Sysno::Read, 0, 0, 1);
+        syscall3(Sysno::Write, 0, 0, 1);
     }
 }
