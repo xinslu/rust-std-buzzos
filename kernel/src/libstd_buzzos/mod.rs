@@ -7,13 +7,15 @@
 pub mod syscalls;
 
 pub mod testing {
-    use crate::interrupts;
-
-    use super::syscalls::{syscall2, syscall3, Sysno};
+    use core::arch::asm;
+    use crate::{interrupts, println};
+    use super::syscalls::{syscall1, syscall2, Sysno};
     pub unsafe fn test_syscall() {
-        let mut mem_break = 0;
-        syscall2(Sysno::Sbrk, 10, mem_break);
-        syscall3(Sysno::Read, 0, 0, 1);
-        syscall3(Sysno::Write, 0, 0, 1);
+        let mem_break: *mut u8;
+        mem_break = syscall1(Sysno::Sbrk, 10) as *mut u8;
+        println!("Addr: {:#?}", mem_break);
+
+        let text: &str = "Hello";
+        syscall2(Sysno::Write, text.as_ptr() as usize, text.len());
     }
 }

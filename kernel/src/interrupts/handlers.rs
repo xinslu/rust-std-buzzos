@@ -1,5 +1,7 @@
-use core::{alloc::{GlobalAlloc, Layout}, ffi::c_void};
-use crate::{println, memory::{heap::HEAP_ALLOCATOR, defs::LinkedListAllocator}};
+use core::{alloc::{GlobalAlloc, Layout}, ffi::c_void, fmt};
+use alloc::{string::String};
+
+use crate::{println, memory::{heap::HEAP_ALLOCATOR, defs::LinkedListAllocator}, devices::console::{CONSOLE, Console}};
 use super::defs::{InterruptStackFrame, PageFaultErr};
 use core::arch::asm;
 
@@ -43,38 +45,33 @@ pub extern "x86-interrupt" fn gen_protection_fault(frame: InterruptStackFrame, _
     panic!("EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}, error code: {_err:#b}", frame);
 }
 
-pub fn sbrk(req_size: usize, mut mem_break: *mut u8) -> usize {
+pub fn sbrk() -> *mut u8 {
     let mut res: usize = 0;
+    let mut req_size: usize = 0;
+    let mut addr: *mut u8;
+    unsafe {
+        asm!(
+            "mov {}, ecx",
+            out(reg) req_size,
+        );
+    };
+
     let layout: Layout;
-    println!("{}", req_size);
     match Layout::from_size_align(req_size, 4) {
         Ok(x) => layout = x, 
         Err(y) => panic!("Layout Error: {}", y)
     };
 
     unsafe {
-        mem_break = HEAP_ALLOCATOR.alloc(layout);
+        addr = HEAP_ALLOCATOR.alloc(layout);
     };
 
-    if mem_break.is_null() {
-        unsafe {
-            asm!(
-                "mov eax, {}",
-                in(reg) -1,
-            );
-        };
+    if addr.is_null() {
         println!("TRAP: SBRK SYSCALL got no free memory\n");
-        return res;
+        return 0 as *mut u8;
     }
-    unsafe {
-        asm!(
-            "mov eax, {}",
-            in(reg) mem_break,
-        );
-    };
-    println!("TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}", req_size, mem_break);
-    res = 1;
-    res
+    println!("TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}", req_size, addr);
+    return addr;
 }
 
 pub fn read(fd: usize, buf: *mut c_void, count: usize) -> usize {
@@ -87,12 +84,34 @@ pub fn read(fd: usize, buf: *mut c_void, count: usize) -> usize {
     res
 }
 
-pub fn write(fd: usize, buf: *const c_void, count: usize) -> usize {
-    let mut res: usize = 0;
-    if count == 0 {
-        res = 1;
-        return res;
+pub unsafe fn write() -> usize {
+    let letter: *const u8;
+    let mut len: usize = 0;
+    asm!(
+        "mov {}, ecx",
+        out(reg) letter,
+    );
+    asm!(
+        "mov {}, edx",
+        out(reg) len,
+    );
+
+    if len == 0 {
+        return 0;
     }
-    println!("TRAP: SYSWRITE");
-    res
+
+    let mut i: isize = 0;
+    let mut write: &str;
+    let mut text: String = String::new();
+    while i < len as isize {
+        let char = *letter.offset(i) as char;
+        text.push(char);
+        i += 1;
+    }
+    
+    write = text.as_str();
+    // let console: Console = todo!();
+    // Console::write_string(&console, write);
+    println!("{:#?}", write);
+    return 1;
 }
