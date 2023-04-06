@@ -32,7 +32,7 @@ pub mod testing {
         //     println!("Heaped ptr: {:#x?}", ptr);
         // }
         
-        // Vector works as long as Drop is not implemented
+        // Vector initialization works, no added functionality yet
         let vector: Vec<u32> = Vec::with_capacity(10);
         println!("Vec ptr: {:#?}, Cap: {:#?}", vector.ptr(), vector.cap());
     }

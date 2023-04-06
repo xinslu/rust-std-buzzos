@@ -94,4 +94,12 @@ impl<T> Vec<T> {
         }
     }
 
+    // TODO: Implement push, pop, remove
 }
+
+// impl<T> Drop for Vec<T> {
+//     fn drop(&mut self) {
+//         while let Some(_) = self.pop() {}
+//         // deallocation is handled by RawVec
+//     }
+// }

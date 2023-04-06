@@ -20,10 +20,12 @@ impl<T> RawVec<T> {
 
     pub fn with_capacity(capacity: usize) -> Self {
         assert!(size_of::<T>() != 0, "Size must be greater than 0");
-        RawVec {
+        let mut raw_vec = RawVec {
             ptr: NonNull::dangling(),
-            cap: capacity,
-        }
+            cap: capacity/2, //allocate capacity on heap first
+        };
+        raw_vec.grow();
+        raw_vec
     }
 
     pub fn grow(&mut self) {
@@ -56,13 +58,13 @@ impl<T> RawVec<T> {
     }
 }
 
-// impl<T> Drop for RawVec<T> {
-//     fn drop(&mut self) {
-//         if self.cap != 0 {
-//             let layout = Layout::array::<T>(self.cap).unwrap();
-//             unsafe {
-//                 HEAP_ALLOCATOR.dealloc(self.ptr.as_ptr() as *mut u8, layout);
-//             }
-//         }
-//     }
-// }
+impl<T> Drop for RawVec<T> {
+    fn drop(&mut self) {
+        if self.cap != 0 {
+            let layout = Layout::array::<T>(self.cap).unwrap();
+            unsafe {
+                HEAP_ALLOCATOR.dealloc(self.ptr.as_ptr() as *mut u8, layout);
+            }
+        }
+    }
+}
