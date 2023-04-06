@@ -21,7 +21,7 @@ pub extern "x86-interrupt" fn page_fault(frame: InterruptStackFrame, _error_code
             out(reg) addr,
         );
     };
-    println!("Page Fault at virtual addreq_sizes {:#x?}", addr);
+    println!("Page Fault at virtual address: {:#x?}", addr);
     panic!("EXCEPTION: PAGE FAULT\n{:#?}", frame);
 }
 

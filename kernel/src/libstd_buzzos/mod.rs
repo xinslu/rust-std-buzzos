@@ -5,17 +5,28 @@
 #![feature(alloc_error_handler)]
 
 pub mod syscalls;
+pub mod memory;
 
 pub mod testing {
     use core::arch::asm;
-    use crate::{interrupts, println};
-    use super::syscalls::{syscall1, syscall2, Sysno};
+    use crate::{println};
+    use super::syscalls::{syscall2, Sysno};
+    use crate::libstd_buzzos::memory::Box::Box;
     pub unsafe fn test_syscall() {
-        let mem_break: *mut u8;
-        mem_break = syscall1(Sysno::Sbrk, 10) as *mut u8;
-        println!("Addr: {:#?}", mem_break);
-
         let text: &str = "Hello";
         syscall2(Sysno::Write, text.as_ptr() as usize, text.len());
+
+        let b = Box::<u32>::new_zeroed();
+        println!("{:#?}", *b);
+
+        let c = Box::new(1);
+        println!("Box ptr: {:#?}", c);
+
+        // Tests if alloc'd ptr is actually on heap (currently works)
+        // unsafe{
+        //     let mut ptr: u32;
+        //     asm!("mov {0}, [{1}]", out(reg) ptr, in(reg) c, options(nomem, nostack, preserves_flags));
+        //     println!("Heaped ptr: {:#x?}", ptr);
+        // }
     }
 }
