@@ -1,7 +1,7 @@
 use core::ptr::{NonNull, null_mut};
 use core::mem::size_of;
 use core::alloc::{Layout, GlobalAlloc};
-
+use crate::{libstd_buzzos::syscalls::{syscall1, Sysno}};
 use crate::memory::heap::HEAP_ALLOCATOR;
 
 pub struct RawVec<T> {
@@ -22,31 +22,32 @@ impl<T> RawVec<T> {
         assert!(size_of::<T>() != 0, "Size must be greater than 0");
         let mut raw_vec = RawVec {
             ptr: NonNull::dangling(),
-            cap: capacity/2, //allocate capacity on heap first
+            cap: capacity, //allocate capacity on heap first
         };
-        raw_vec.grow();
+        raw_vec.grow(true);
         raw_vec
     }
 
-    pub fn grow(&mut self) {
+    pub fn grow(&mut self, is_init: bool) {
         // This can't overflow because we ensure self.cap <= isize::MAX.
-        let new_cap = if self.cap == 0 { 1 } else { 2 * self.cap };
-        
+        let new_cap = if self.cap == 0 {
+            1 
+        } else if is_init {
+            self.cap
+        } else { 
+            2* self.cap
+        };
         // Layout::array checks that the number of bytes is <= usize::MAX,
         // but this is redundant since old_layout.size() <= isize::MAX,
         // so the `unwrap` should never fail.
-        let new_layout = Layout::array::<T>(new_cap).unwrap();
+        let new_ptr: *mut u8 = if self.cap == 0 {
+            unsafe{syscall1(Sysno::Sbrk, new_cap) as *mut u8} 
+        } else {
+            unsafe{syscall1(Sysno::Sbrk, self.cap) as *mut u8} 
+        };
 
         // Ensure that the new allocation doesn't exceed `isize::MAX` bytes.
-        assert!(new_layout.size() <= isize::MAX as usize, "Allocation too large");
-
-        let new_ptr: *mut u8 = if self.cap == 0 {
-            unsafe { HEAP_ALLOCATOR.alloc(new_layout) }
-        } else {
-            let old_layout = Layout::array::<T>(self.cap).unwrap();
-            // let old_ptr = self.ptr.as_ptr() as *mut u8;
-            unsafe { HEAP_ALLOCATOR.alloc(old_layout)}
-        };
+        // assert!(new_layout.size() <= isize::MAX as usize, "Allocation too large");
 
         // If allocation fails, `new_ptr` will be null, in which case we abort.
         self.ptr = match NonNull::new(new_ptr as *mut T) {
@@ -56,6 +57,8 @@ impl<T> RawVec<T> {
 
         self.cap = new_cap;
     }
+
+    
 }
 
 impl<T> Drop for RawVec<T> {

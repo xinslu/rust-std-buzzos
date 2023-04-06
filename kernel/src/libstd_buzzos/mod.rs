@@ -10,6 +10,7 @@ pub mod collections;
 
 pub mod testing {
     use core::arch::asm;
+
     use crate::{println};
     use super::syscalls::{syscall2, Sysno};
     use crate::libstd_buzzos::memory::Box::Box;
@@ -31,9 +32,28 @@ pub mod testing {
         //     asm!("mov {0}, [{1}]", out(reg) ptr, in(reg) c, options(nomem, nostack, preserves_flags));
         //     println!("Heaped ptr: {:#x?}", ptr);
         // }
-        
-        // Vector initialization works, no added functionality yet
-        let vector: Vec<u32> = Vec::with_capacity(10);
+        vector_tests();
+    }   
+
+    // Tests basic vector initialization with push/pop/clear
+    pub unsafe fn vector_tests() {
+        let mut vector: Vec<u32> = Vec::with_capacity(10);
         println!("Vec ptr: {:#?}, Cap: {:#?}", vector.ptr(), vector.cap());
+        vector.push(1);
+        vector.push(80);
+        println!("Vector element 0: {:#?}", *vector.ptr());
+        println!("Vector element 1: {:#?}", *vector.ptr().offset(1));
+        let val: Option<u32> = vector.pop();
+        println!("Vector element 0: {:#?}", *vector.ptr());
+        println!("Popped val: {:#?}", val.unwrap());
+        println!("Vector Length: {:#?}", vector.len());
+        vector.push(10);
+        println!("Vector element 0: {:#?}", *vector.ptr());
+        println!("Vector element 1: {:#?}", *vector.ptr().offset(1));
+        println!("Vector Length: {:#?}", vector.len());
+        vector.clear();
+        println!("Vector Length: {:#?}", vector.len());
+        println!("Vector element 0: {:#?}", *vector.ptr());
+        println!("Is empty? {:#?}", vector.is_empty());
     }
 }
