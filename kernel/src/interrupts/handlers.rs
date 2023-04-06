@@ -110,8 +110,6 @@ pub unsafe fn write() -> usize {
     }
     
     write = text.as_str();
-    // let console: Console = todo!();
-    // Console::write_string(&console, write);
     println!("{:#?}", write);
     return 1;
 }
