@@ -7,6 +7,7 @@
 pub mod syscalls;
 pub mod memory;
 pub mod collections;
+pub mod types;
 
 pub mod testing {
     use core::arch::asm;
@@ -55,5 +56,10 @@ pub mod testing {
         println!("Vector Length: {:#?}", vector.len());
         println!("Vector element 0: {:#?}", *vector.ptr());
         println!("Is empty? {:#?}", vector.is_empty());
+    }
+
+    // Tests basic string initialization
+    pub unsafe fn string_tests() {
+        // let mut vector: Vec<u32> = Vec::with_capacity(10);
     }
 }
