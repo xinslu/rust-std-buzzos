@@ -66,10 +66,13 @@ pub mod testing {
 
     // Tests basic string initialization
     pub unsafe fn string_tests() {
-        let string2: String = String::from("Hello World!");
-        println!("Len: {:#?}", string2.len());
-        println!("Char 1: {:#?}", string2.get_char_at(1));
-
+        let mut string: String = String::from("Hello World!");
+        println!("Len: {:#?}", string.len());
+        println!("Char 1: {:#?}", string.get_char_at(1));
+        string.push('Y');
+        assert!(string.get_char_at(12) == 'Y');
+        assert!(string.pop().unwrap() == 'Y');
+        assert!(string.len() == 12);
     }
 
     // Tests basic Deque initialization 
