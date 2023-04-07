@@ -1,40 +1,43 @@
-use crate::libstd_buzzos::memory::Box::Box;
+use crate::{libstd_buzzos::memory::Box::Box, println};
 use core::ptr::{null_mut};
+use crate::{libstd_buzzos::syscalls::{syscall1, Sysno}};
 
-struct Node<T : Copy> {
-    value: T,
-    next: *mut Node<T>,
-    prev: *mut Node<T>,
+pub struct Node<T : Copy> {
+    pub value: T,
+    pub next: *mut Node<T>,
+    pub prev: *mut Node<T>,
 }
 
 impl<T : Copy> Node<T> {
-    fn new(value: T) -> Self {
-        Node {
-            value,
-            next: null_mut(),
-            prev: null_mut(),
-        }
+    pub unsafe fn new(value: T) -> *mut Node<T> {
+        println!("Trying to alloc");
+        let pointer = unsafe{syscall1(Sysno::Sbrk,core::mem::size_of::<Node<T>>()) as *mut Node<T>};
+        (*pointer).value = value;
+        (*pointer).next = null_mut();
+        (*pointer).next = null_mut();
+
+        pointer
     }
 }
 
-struct Deque<T : Copy> {
-    head: *mut Node<T>,
-    tail: *mut Node<T>,
-    len: usize,
+pub struct VecDeque<T : Copy> {
+    pub head: *mut Node<T>,
+    pub tail: *mut Node<T>,
+    pub len: usize,
 }
 
 
-impl<T : Copy> Deque<T> {
-    fn new() -> Self {
-        Deque {
+impl<T : Copy> VecDeque<T> {
+    pub fn new() -> Self {
+        VecDeque {
             head: null_mut(),
             tail: null_mut(),
             len: 0,
         }
     }
 
-    unsafe fn push_front(&mut self, value: T) {
-        let mut new_node: *mut Node<T> = Box::new(Node::new(value)) as *mut Node<T>;
+    pub unsafe fn push_front(&mut self, value: T) {
+        let mut new_node: *mut Node<T> = Node::new(value); 
         (*new_node).prev = null_mut();
         (*new_node).next = self.head;
 
@@ -43,12 +46,13 @@ impl<T : Copy> Deque<T> {
             self.tail = new_node;
         } else {
             (*self.head).prev = new_node;
+            self.head = new_node;
         }
 
         self.len += 1;
     }
 
-    unsafe fn push_back(&mut self, value: T) {
+    pub unsafe fn push_back(&mut self, value: T) {
         let mut new_node: *mut Node<T> = Box::new(Node::new(value)) as *mut Node<T>;
         (*new_node).next = null_mut();
         (*new_node).prev = self.tail;
@@ -63,9 +67,9 @@ impl<T : Copy> Deque<T> {
         self.len += 1;
     }
 
-    unsafe fn pop_front(&mut self) -> Option<T> {
+    pub unsafe fn pop_front(&mut self) -> Option<T> {
         if self.head == null_mut() {
-            panic!("Sai gae");
+            panic!("ERROR: popping from an empty list.");
         }
 
         let value = (*self.head).value;
@@ -76,12 +80,14 @@ impl<T : Copy> Deque<T> {
             self.tail = null_mut();
         }
 
+        self.len -= 1;
+
         return Some(value);
     }
 
-    unsafe fn pop_back(&mut self) -> Option<T> {
+    pub unsafe fn pop_back(&mut self) -> Option<T> {
         if self.head == null_mut() {
-            panic!("Sai gae");
+            panic!("ERROR: popping from an empty list.");
         }
 
         let value = (*self.tail).value;
@@ -91,6 +97,8 @@ impl<T : Copy> Deque<T> {
         if (*self.tail).prev == null_mut() {
             self.head = null_mut();
         }
+
+        self.len -= 1;
 
         return Some(value);
     }

@@ -18,6 +18,7 @@ pub mod testing {
     use super::syscalls::{syscall2, Sysno};
     use crate::libstd_buzzos::memory::Box::Box;
     use crate::libstd_buzzos::collections::Vec::Vec;
+    use crate::libstd_buzzos::collections::VecDeque::VecDeque;
     use crate::libstd_buzzos::types::String::String;
 
     pub unsafe fn test_syscall() {
@@ -37,6 +38,7 @@ pub mod testing {
         //     println!("Heaped ptr: {:#x?}", ptr);
         // }
         vector_tests();
+        deque_tests();
     }   
 
     // Tests basic vector initialization with push/pop/clear
@@ -64,5 +66,18 @@ pub mod testing {
     // Tests basic string initialization
     pub unsafe fn string_tests() {
         let string: String = String::new();
+    }
+
+    // Tests basic Deque initialization 
+    pub unsafe fn deque_tests() {
+        let mut vd : VecDeque<u32> = VecDeque::new();
+        vd.push_front(1);
+        println!("Head: {:#?}", (*vd.head).value);
+        println!("Tail: {:#?}", (*vd.tail).value);
+        vd.push_front(80);
+        println!("Head: {:#?}", (*vd.head).value);
+        println!("Tail: {:#?}", (*vd.tail).value);
+        vd.push_back(19);
+
     }
 }
