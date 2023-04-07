@@ -78,10 +78,11 @@ pub mod testing {
         vd.push_front(1);
         println!("Head: {:#?}", (*vd.head).value);
         println!("Tail: {:#?}", (*vd.tail).value);
-        vd.push_front(80);
+        vd.push_back(80);
         println!("Head: {:#?}", (*vd.head).value);
         println!("Tail: {:#?}", (*vd.tail).value);
-        vd.push_back(19);
-
+        vd.pop_front();
+        println!("Head: {:#?}", (*vd.head).value);
+        println!("Tail: {:#?}", (*vd.tail).value);
     }
 }

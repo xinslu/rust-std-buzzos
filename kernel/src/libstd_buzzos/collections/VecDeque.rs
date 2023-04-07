@@ -11,6 +11,7 @@ pub struct Node<T : Copy> {
 impl<T : Copy> Node<T> {
     pub unsafe fn new(value: T) -> *mut Node<T> {
         println!("Trying to alloc");
+        println!("{:#?}", core::mem::size_of::<Node<T>>());
         let pointer = unsafe{syscall1(Sysno::Sbrk,core::mem::size_of::<Node<T>>()) as *mut Node<T>};
         (*pointer).value = value;
         (*pointer).next = null_mut();
@@ -53,7 +54,7 @@ impl<T : Copy> VecDeque<T> {
     }
 
     pub unsafe fn push_back(&mut self, value: T) {
-        let mut new_node: *mut Node<T> = Box::new(Node::new(value)) as *mut Node<T>;
+        let mut new_node: *mut Node<T> = Node::new(value); 
         (*new_node).next = null_mut();
         (*new_node).prev = self.tail;
 
@@ -62,6 +63,7 @@ impl<T : Copy> VecDeque<T> {
             self.tail = new_node;
         } else {
             (*self.tail).next = new_node;
+            self.tail = new_node;
         }
 
         self.len += 1;
@@ -77,7 +79,7 @@ impl<T : Copy> VecDeque<T> {
         (*self.head).prev = null_mut();
         
         if (*self.head).next == null_mut() {
-            self.tail = null_mut();
+            self.tail = self.head; 
         }
 
         self.len -= 1;
