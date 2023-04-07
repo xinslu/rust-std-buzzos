@@ -3,6 +3,8 @@
 #![feature(abi_x86_interrupt)]
 #![feature(const_mut_refs)]
 #![feature(alloc_error_handler)]
+#![feature(ptr_internals)]
+#![feature(decl_macro)]
 
 pub mod syscalls;
 pub mod memory;
