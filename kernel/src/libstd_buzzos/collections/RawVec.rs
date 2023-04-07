@@ -57,8 +57,6 @@ impl<T> RawVec<T> {
 
         self.cap = new_cap;
     }
-
-    
 }
 
 impl<T> Drop for RawVec<T> {

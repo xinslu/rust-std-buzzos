@@ -4,6 +4,15 @@
 #![feature(abi_x86_interrupt)]
 #![feature(const_mut_refs)]
 #![feature(alloc_error_handler)]
+#![feature(decl_macro)]
+#![feature(const_trait_impl)]
+#![feature(never_type)]
+#![feature(rustc_attrs)]
+#![feature(negative_impls)]
+#![feature(lang_items)]
+#![feature(allow_internal_unstable)]
+#![feature(unsize)]
+#![feature(coerce_unsized)]
 #[macro_use]
 
 pub mod devices;
