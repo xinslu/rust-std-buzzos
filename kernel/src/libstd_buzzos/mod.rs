@@ -37,9 +37,9 @@ pub mod testing {
         //     asm!("mov {0}, [{1}]", out(reg) ptr, in(reg) c, options(nomem, nostack, preserves_flags));
         //     println!("Heaped ptr: {:#x?}", ptr);
         // }
+        string_tests();
         vector_tests();
         deque_tests();
-        string_tests();
     }   
 
     // Tests basic vector initialization with push/pop/clear
