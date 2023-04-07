@@ -17,12 +17,12 @@
 
 pub mod devices;
 pub mod interrupts;
+pub mod libstd_buzzos;
 pub mod memory;
 pub mod misc;
 pub mod structures;
 pub mod threading;
 pub mod x86;
-pub mod libstd_buzzos;
 
 use core::panic::PanicInfo;
 

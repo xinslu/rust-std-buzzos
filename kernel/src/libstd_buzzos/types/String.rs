@@ -3,15 +3,16 @@ use alloc::borrow::ToOwned;
 use crate::libstd_buzzos::collections::Vec::Vec;
 use crate::libstd_buzzos::memory::Box::Box;
 
+use core::fmt;
 use core::ptr;
 use core::slice;
 
+#[derive(Clone)]
 pub struct String {
     vec: Vec<u8>,
 }
 
 impl String {
-
     /// Creates a new empty `String`.
     ///
     /// Given that the `String` is empty, this will not allocate any initial
@@ -76,7 +77,9 @@ impl String {
     #[inline]
     #[must_use]
     pub fn with_capacity(capacity: usize) -> String {
-        String { vec: Vec::with_capacity(capacity) }
+        String {
+            vec: Vec::with_capacity(capacity),
+        }
     }
 
     // /// Extracts a string slice containing the entire `String`.
@@ -244,13 +247,30 @@ impl String {
     /// The result is allocated on the heap.
     #[inline]
     pub fn from(s: &str) -> String {
-        let mut vec: Vec<u8> =  Vec::with_capacity(s.len());
+        let mut vec: Vec<u8> = Vec::with_capacity(s.len());
         let mut i = 0;
         while i < s.len() {
-            unsafe{ vec.push(*s.as_ptr().offset(i as isize)) };
+            unsafe { vec.push(*s.as_ptr().offset(i as isize)) };
             i += 1;
-        } 
+        }
         String { vec: vec }
     }
+}
 
+impl fmt::Display for String {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for i in 0..self.len() {
+            write!(f, "{}", self.get_char_at(i))?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Debug for String {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for i in 0..self.len() {
+            write!(f, "{}", self.get_char_at(i))?;
+        }
+        Ok(())
+    }
 }

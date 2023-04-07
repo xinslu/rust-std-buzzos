@@ -1,6 +1,7 @@
 use crate::libstd_buzzos::collections::RawVec::RawVec;
 use core::ptr::{self};
 
+#[derive(Clone)]
 pub struct Vec<T> {
     buf: RawVec<T>,
     len: usize,
@@ -39,7 +40,7 @@ impl<T> Vec<T> {
     //     }
     //     arr
     // }
-    
+
     /// Constructs a new, empty `Vec<T>`.
     ///
     /// The vector will not allocate until elements are pushed onto it.
@@ -168,9 +169,7 @@ impl<T> Vec<T> {
     #[inline]
     pub fn get(&self, index: usize) -> T {
         assert!(self.len != 0, "Cannot get from zero-sized Vec!");
-        unsafe {
-            ptr::read(self.ptr().offset(index as isize))
-        }
+        unsafe { ptr::read(self.ptr().offset(index as isize)) }
     }
 
     /// Clears the vector, removing all values.

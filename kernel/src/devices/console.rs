@@ -1,8 +1,7 @@
+use alloc::string::{String, ToString};
 use core::fmt;
-use alloc::{string::{String, ToString}};
 use lazy_static::lazy_static;
 use spin::Mutex;
-
 
 use super::uart::{uart_put_char, uart_read_char};
 
@@ -29,9 +28,9 @@ impl Console {
     fn read_char(&self) -> Result<char, ()> {
         return uart_read_char();
     }
-    
+
     pub fn read_string(&self) -> Result<String, ()> {
-        let mut res:String = "".to_string();
+        let mut res: String = "".to_string();
         loop {
             match self.read_char() {
                 Ok(c) => res = res + (c.encode_utf8(&mut [0; 1]) as &mut str),

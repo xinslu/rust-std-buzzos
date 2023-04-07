@@ -6,20 +6,21 @@
 #![feature(ptr_internals)]
 #![feature(decl_macro)]
 
-pub mod syscalls;
-pub mod memory;
 pub mod collections;
+pub mod memory;
+pub mod syscalls;
 pub mod types;
 
 pub mod testing {
     use core::arch::asm;
 
-    use crate::{println};
     use super::syscalls::{syscall2, Sysno};
-    use crate::libstd_buzzos::memory::Box::Box;
     use crate::libstd_buzzos::collections::Vec::Vec;
     use crate::libstd_buzzos::collections::VecDeque::VecDeque;
+    use crate::libstd_buzzos::memory::Box::Box;
+    use crate::libstd_buzzos::memory::Clone::Clone;
     use crate::libstd_buzzos::types::String::String;
+    use crate::println;
 
     pub unsafe fn test_syscall() {
         let text: &str = "Hello";
@@ -37,10 +38,11 @@ pub mod testing {
         //     asm!("mov {0}, [{1}]", out(reg) ptr, in(reg) c, options(nomem, nostack, preserves_flags));
         //     println!("Heaped ptr: {:#x?}", ptr);
         // }
-        string_tests();
+        clone_tests();
         vector_tests();
         deque_tests();
-    }   
+        // string_tests();
+    }
 
     // Tests basic vector initialization with push/pop/clear
     pub unsafe fn vector_tests() {
@@ -75,9 +77,9 @@ pub mod testing {
         assert!(string.len() == 12);
     }
 
-    // Tests basic Deque initialization 
+    // Tests basic Deque initialization
     pub unsafe fn deque_tests() {
-        let mut vd : VecDeque<u32> = VecDeque::new();
+        let mut vd: VecDeque<u32> = VecDeque::new();
         vd.push_front(1);
         println!("Head: {:#?}", (*vd.head).value);
         println!("Tail: {:#?}", (*vd.tail).value);
@@ -87,5 +89,11 @@ pub mod testing {
         vd.pop_front();
         println!("Head: {:#?}", (*vd.head).value);
         println!("Tail: {:#?}", (*vd.tail).value);
+    }
+
+    pub unsafe fn clone_tests() {
+        let string: String = String::from("Hello World!");
+        let string2: String = string.clone();
+        println!("{}", string2);
     }
 }

@@ -190,14 +190,12 @@
 //! [`Mutex<T>`]: ../../std/sync/struct.Mutex.html
 //! [`atomic`]: crate::sync::atomic
 
-
 use core::cmp::Ordering;
 use core::fmt::{self, Debug, Display};
 use core::marker::{PhantomData, Unsize};
 use core::mem;
 use core::ops::{CoerceUnsized, Deref, DerefMut};
 use core::ptr::{self, NonNull};
-
 
 /// A mutable memory location.
 ///
@@ -237,7 +235,6 @@ pub struct Cell<T: ?Sized> {
     value: UnsafeCell<T>,
 }
 
-
 unsafe impl<T: ?Sized> Send for Cell<T> where T: Send {}
 
 // Note that this negative impl isn't strictly necessary for correctness,
@@ -248,14 +245,12 @@ unsafe impl<T: ?Sized> Send for Cell<T> where T: Send {}
 
 impl<T: ?Sized> !Sync for Cell<T> {}
 
-
 impl<T: Copy> Clone for Cell<T> {
     #[inline]
     fn clone(&self) -> Cell<T> {
         Cell::new(self.get())
     }
 }
-
 
 impl<T: Default> Default for Cell<T> {
     /// Creates a `Cell<T>`, with the `Default` value for T.
@@ -265,7 +260,6 @@ impl<T: Default> Default for Cell<T> {
     }
 }
 
-
 impl<T: PartialEq + Copy> PartialEq for Cell<T> {
     #[inline]
     fn eq(&self, other: &Cell<T>) -> bool {
@@ -273,9 +267,7 @@ impl<T: PartialEq + Copy> PartialEq for Cell<T> {
     }
 }
 
-
 impl<T: Eq + Copy> Eq for Cell<T> {}
-
 
 impl<T: PartialOrd + Copy> PartialOrd for Cell<T> {
     #[inline]
@@ -304,15 +296,12 @@ impl<T: PartialOrd + Copy> PartialOrd for Cell<T> {
     }
 }
 
-
 impl<T: Ord + Copy> Ord for Cell<T> {
     #[inline]
     fn cmp(&self, other: &Cell<T>) -> Ordering {
         self.get().cmp(&other.get())
     }
 }
-
-
 
 impl<T> const From<T> for Cell<T> {
     /// Creates a new `Cell<T>` containing the given value.
@@ -332,10 +321,11 @@ impl<T> Cell<T> {
     /// let c = Cell::new(5);
     /// ```
 
-
     #[inline]
     pub const fn new(value: T) -> Cell<T> {
-        Cell { value: UnsafeCell::new(value) }
+        Cell {
+            value: UnsafeCell::new(value),
+        }
     }
 
     /// Sets the contained value.
@@ -468,7 +458,6 @@ impl<T: ?Sized> Cell<T> {
     /// ```
     #[inline]
 
-
     pub const fn as_ptr(&self) -> *mut T {
         self.value.get()
     }
@@ -542,7 +531,6 @@ impl<T: Default> Cell<T> {
     }
 }
 
-
 impl<T: CoerceUnsized<U>, U> CoerceUnsized<Cell<U>> for Cell<T> {}
 
 impl<T> Cell<[T]> {
@@ -608,7 +596,6 @@ pub struct BorrowError {
     location: &'static crate::panic::Location<'static>,
 }
 
-
 impl Debug for BorrowError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut builder = f.debug_struct("BorrowError");
@@ -619,7 +606,6 @@ impl Debug for BorrowError {
         builder.finish()
     }
 }
-
 
 impl Display for BorrowError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -635,7 +621,6 @@ pub struct BorrowMutError {
     location: &'static crate::panic::Location<'static>,
 }
 
-
 impl Debug for BorrowMutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut builder = f.debug_struct("BorrowMutError");
@@ -646,7 +631,6 @@ impl Debug for BorrowMutError {
         builder.finish()
     }
 }
-
 
 impl Display for BorrowMutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -691,7 +675,6 @@ impl<T> RefCell<T> {
     /// let c = RefCell::new(5);
     /// ```
 
-
     #[inline]
     pub const fn new(value: T) -> RefCell<T> {
         RefCell {
@@ -733,7 +716,6 @@ impl<T> RefCell<T> {
     /// assert_eq!(cell, RefCell::new(6));
     /// ```
     #[inline]
-
     #[track_caller]
     pub fn replace(&self, t: T) -> T {
         mem::replace(&mut *self.borrow_mut(), t)
@@ -756,7 +738,6 @@ impl<T> RefCell<T> {
     /// assert_eq!(cell, RefCell::new(6));
     /// ```
     #[inline]
-
     #[track_caller]
     pub fn replace_with<F: FnOnce(&mut T) -> T>(&self, f: F) -> T {
         let mut_borrow = &mut *self.borrow_mut();
@@ -958,7 +939,11 @@ impl<T: ?Sized> RefCell<T> {
 
                 // SAFETY: `BorrowRefMut` guarantees unique access.
                 let value = unsafe { NonNull::new_unchecked(self.value.get()) };
-                Ok(RefMut { value, borrow: b, marker: PhantomData })
+                Ok(RefMut {
+                    value,
+                    borrow: b,
+                    marker: PhantomData,
+                })
             }
             None => Err(BorrowMutError {
                 // If a borrow occurred, then we must already have an outstanding borrow,
@@ -1118,12 +1103,9 @@ impl<T: Default> RefCell<T> {
     }
 }
 
-
 unsafe impl<T: ?Sized> Send for RefCell<T> where T: Send {}
 
-
 impl<T: ?Sized> !Sync for RefCell<T> {}
-
 
 impl<T: Clone> Clone for RefCell<T> {
     /// # Panics
@@ -1145,7 +1127,6 @@ impl<T: Clone> Clone for RefCell<T> {
     }
 }
 
-
 impl<T: Default> Default for RefCell<T> {
     /// Creates a `RefCell<T>`, with the `Default` value for T.
     #[inline]
@@ -1153,7 +1134,6 @@ impl<T: Default> Default for RefCell<T> {
         RefCell::new(Default::default())
     }
 }
-
 
 impl<T: ?Sized + PartialEq> PartialEq for RefCell<T> {
     /// # Panics
@@ -1165,9 +1145,7 @@ impl<T: ?Sized + PartialEq> PartialEq for RefCell<T> {
     }
 }
 
-
 impl<T: ?Sized + Eq> Eq for RefCell<T> {}
-
 
 impl<T: ?Sized + PartialOrd> PartialOrd for RefCell<T> {
     /// # Panics
@@ -1211,7 +1189,6 @@ impl<T: ?Sized + PartialOrd> PartialOrd for RefCell<T> {
     }
 }
 
-
 impl<T: ?Sized + Ord> Ord for RefCell<T> {
     /// # Panics
     ///
@@ -1222,15 +1199,12 @@ impl<T: ?Sized + Ord> Ord for RefCell<T> {
     }
 }
 
-
-
 impl<T> const From<T> for RefCell<T> {
     /// Creates a new `RefCell<T>` containing the given value.
     fn from(t: T) -> RefCell<T> {
         RefCell::new(t)
     }
 }
-
 
 impl<T: CoerceUnsized<U>, U> CoerceUnsized<RefCell<U>> for RefCell<T> {}
 
@@ -1283,7 +1257,9 @@ impl Clone for BorrowRef<'_> {
         // a writing borrow.
         assert!(borrow != isize::MAX);
         self.borrow.set(borrow + 1);
-        BorrowRef { borrow: self.borrow }
+        BorrowRef {
+            borrow: self.borrow,
+        }
     }
 }
 
@@ -1298,7 +1274,6 @@ pub struct Ref<'b, T: ?Sized + 'b> {
     value: NonNull<T>,
     borrow: BorrowRef<'b>,
 }
-
 
 impl<T: ?Sized> Deref for Ref<'_, T> {
     type Target = T;
@@ -1323,7 +1298,10 @@ impl<'b, T: ?Sized> Ref<'b, T> {
     #[must_use]
     #[inline]
     pub fn clone(orig: &Ref<'b, T>) -> Ref<'b, T> {
-        Ref { value: orig.value, borrow: orig.borrow.clone() }
+        Ref {
+            value: orig.value,
+            borrow: orig.borrow.clone(),
+        }
     }
 
     /// Makes a new `Ref` for a component of the borrowed data.
@@ -1350,7 +1328,10 @@ impl<'b, T: ?Sized> Ref<'b, T> {
     where
         F: FnOnce(&T) -> &U,
     {
-        Ref { value: NonNull::from(f(&*orig)), borrow: orig.borrow }
+        Ref {
+            value: NonNull::from(f(&*orig)),
+            borrow: orig.borrow,
+        }
     }
 
     /// Makes a new `Ref` for an optional component of the borrowed data. The
@@ -1380,7 +1361,10 @@ impl<'b, T: ?Sized> Ref<'b, T> {
         F: FnOnce(&T) -> Option<&U>,
     {
         match f(&*orig) {
-            Some(value) => Ok(Ref { value: NonNull::from(value), borrow: orig.borrow }),
+            Some(value) => Ok(Ref {
+                value: NonNull::from(value),
+                borrow: orig.borrow,
+            }),
             None => Err(orig),
         }
     }
@@ -1414,8 +1398,14 @@ impl<'b, T: ?Sized> Ref<'b, T> {
         let (a, b) = f(&*orig);
         let borrow = orig.borrow.clone();
         (
-            Ref { value: NonNull::from(a), borrow },
-            Ref { value: NonNull::from(b), borrow: orig.borrow },
+            Ref {
+                value: NonNull::from(a),
+                borrow,
+            },
+            Ref {
+                value: NonNull::from(b),
+                borrow: orig.borrow,
+            },
         )
     }
 
@@ -1455,9 +1445,7 @@ impl<'b, T: ?Sized> Ref<'b, T> {
     }
 }
 
-
 impl<'b, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<Ref<'b, U>> for Ref<'b, T> {}
-
 
 impl<T: ?Sized + fmt::Display> fmt::Display for Ref<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1496,7 +1484,11 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
         F: FnOnce(&mut T) -> &mut U,
     {
         let value = NonNull::from(f(&mut *orig));
-        RefMut { value, borrow: orig.borrow, marker: PhantomData }
+        RefMut {
+            value,
+            borrow: orig.borrow,
+            marker: PhantomData,
+        }
     }
 
     /// Makes a new `RefMut` for an optional component of the borrowed data. The
@@ -1538,9 +1530,11 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
         // inside of the function call never allowing the exclusive reference to
         // escape.
         match f(&mut *orig) {
-            Some(value) => {
-                Ok(RefMut { value: NonNull::from(value), borrow: orig.borrow, marker: PhantomData })
-            }
+            Some(value) => Ok(RefMut {
+                value: NonNull::from(value),
+                borrow: orig.borrow,
+                marker: PhantomData,
+            }),
             None => Err(orig),
         }
     }
@@ -1582,8 +1576,16 @@ impl<'b, T: ?Sized> RefMut<'b, T> {
         let borrow = orig.borrow.clone();
         let (a, b) = f(&mut *orig);
         (
-            RefMut { value: NonNull::from(a), borrow, marker: PhantomData },
-            RefMut { value: NonNull::from(b), borrow: orig.borrow, marker: PhantomData },
+            RefMut {
+                value: NonNull::from(a),
+                borrow,
+                marker: PhantomData,
+            },
+            RefMut {
+                value: NonNull::from(b),
+                borrow: orig.borrow,
+                marker: PhantomData,
+            },
         )
     }
 
@@ -1663,7 +1665,9 @@ impl<'b> BorrowRefMut<'b> {
         // Prevent the borrow counter from underflowing.
         assert!(borrow != isize::MIN);
         self.borrow.set(borrow - 1);
-        BorrowRefMut { borrow: self.borrow }
+        BorrowRefMut {
+            borrow: self.borrow,
+        }
     }
 }
 
@@ -1680,7 +1684,6 @@ pub struct RefMut<'b, T: ?Sized + 'b> {
     marker: PhantomData<&'b mut T>,
 }
 
-
 impl<T: ?Sized> Deref for RefMut<'_, T> {
     type Target = T;
 
@@ -1691,7 +1694,6 @@ impl<T: ?Sized> Deref for RefMut<'_, T> {
     }
 }
 
-
 impl<T: ?Sized> DerefMut for RefMut<'_, T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut T {
@@ -1700,9 +1702,7 @@ impl<T: ?Sized> DerefMut for RefMut<'_, T> {
     }
 }
 
-
 impl<'b, T: ?Sized + Unsize<U>, U: ?Sized> CoerceUnsized<RefMut<'b, U>> for RefMut<'b, T> {}
-
 
 impl<T: ?Sized + fmt::Display> fmt::Display for RefMut<'_, T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -1889,7 +1889,6 @@ pub struct UnsafeCell<T: ?Sized> {
     value: T,
 }
 
-
 impl<T: ?Sized> !Sync for UnsafeCell<T> {}
 
 impl<T> UnsafeCell<T> {
@@ -1909,7 +1908,6 @@ impl<T> UnsafeCell<T> {
     pub const fn new(value: T) -> UnsafeCell<T> {
         UnsafeCell { value }
     }
-
 }
 
 impl<T: ?Sized> UnsafeCell<T> {
@@ -1930,7 +1928,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// let five = uc.get();
     /// ```
     #[inline(always)]
-
 
     pub const fn get(&self) -> *mut T {
         // We can just cast the pointer from `UnsafeCell<T>` to `T` because of
@@ -1955,7 +1952,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// assert_eq!(*c.get_mut(), 6);
     /// ```
     #[inline(always)]
-
 
     pub const fn get_mut(&mut self) -> &mut T {
         &mut self.value
@@ -1989,7 +1985,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     /// ```
     #[inline(always)]
 
-
     pub const fn raw_get(this: *const Self) -> *mut T {
         // We can just cast the pointer from `UnsafeCell<T>` to `T` because of
         // #[repr(transparent)]. This exploits std's special status, there is
@@ -1998,7 +1993,6 @@ impl<T: ?Sized> UnsafeCell<T> {
     }
 }
 
-
 impl<T: Default> Default for UnsafeCell<T> {
     /// Creates an `UnsafeCell`, with the `Default` value for T.
     fn default() -> UnsafeCell<T> {
@@ -2006,15 +2000,12 @@ impl<T: Default> Default for UnsafeCell<T> {
     }
 }
 
-
-
 impl<T> const From<T> for UnsafeCell<T> {
     /// Creates a new `UnsafeCell<T>` containing the given value.
     fn from(t: T) -> UnsafeCell<T> {
         UnsafeCell::new(t)
     }
 }
-
 
 impl<T: CoerceUnsized<U>, U> CoerceUnsized<UnsafeCell<U>> for UnsafeCell<T> {}
 
@@ -2036,19 +2027,17 @@ pub struct SyncUnsafeCell<T: ?Sized> {
     value: UnsafeCell<T>,
 }
 
-
 unsafe impl<T: ?Sized + Sync> Sync for SyncUnsafeCell<T> {}
-
 
 impl<T> SyncUnsafeCell<T> {
     /// Constructs a new instance of `SyncUnsafeCell` which will wrap the specified value.
     #[inline]
     pub const fn new(value: T) -> Self {
-        Self { value: UnsafeCell { value } }
+        Self {
+            value: UnsafeCell { value },
+        }
     }
-
 }
-
 
 impl<T: ?Sized> SyncUnsafeCell<T> {
     /// Gets a mutable pointer to the wrapped value.
@@ -2083,7 +2072,6 @@ impl<T: ?Sized> SyncUnsafeCell<T> {
     }
 }
 
-
 impl<T: Default> Default for SyncUnsafeCell<T> {
     /// Creates an `SyncUnsafeCell`, with the `Default` value for T.
     fn default() -> SyncUnsafeCell<T> {
@@ -2091,15 +2079,12 @@ impl<T: Default> Default for SyncUnsafeCell<T> {
     }
 }
 
-
-
 impl<T> const From<T> for SyncUnsafeCell<T> {
     /// Creates a new `SyncUnsafeCell<T>` containing the given value.
     fn from(t: T) -> SyncUnsafeCell<T> {
         SyncUnsafeCell::new(t)
     }
 }
-
 
 impl<T: CoerceUnsized<U>, U> CoerceUnsized<SyncUnsafeCell<U>> for SyncUnsafeCell<T> {}
 

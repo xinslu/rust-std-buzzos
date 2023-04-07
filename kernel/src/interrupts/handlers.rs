@@ -1,8 +1,16 @@
-use core::{alloc::{GlobalAlloc, Layout}, ffi::c_void, fmt};
-use alloc::{string::String};
+use alloc::string::String;
+use core::{
+    alloc::{GlobalAlloc, Layout},
+    ffi::c_void,
+    fmt,
+};
 
-use crate::{println, memory::{heap::HEAP_ALLOCATOR, defs::LinkedListAllocator}, devices::console::{CONSOLE, Console}};
 use super::defs::{InterruptStackFrame, PageFaultErr};
+use crate::{
+    devices::console::{Console, CONSOLE},
+    memory::{defs::LinkedListAllocator, heap::HEAP_ALLOCATOR},
+    println,
+};
 use core::arch::asm;
 
 pub extern "x86-interrupt" fn div_by_zero_handler(frame: InterruptStackFrame) {
@@ -42,7 +50,10 @@ pub extern "x86-interrupt" fn double_fault_handler(frame: InterruptStackFrame, _
 }
 
 pub extern "x86-interrupt" fn gen_protection_fault(frame: InterruptStackFrame, _err: u32) {
-    panic!("EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}, error code: {_err:#b}", frame);
+    panic!(
+        "EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}, error code: {_err:#b}",
+        frame
+    );
 }
 
 pub fn sbrk() -> *mut u8 {
@@ -58,8 +69,8 @@ pub fn sbrk() -> *mut u8 {
 
     let layout: Layout;
     match Layout::from_size_align(req_size, 4) {
-        Ok(x) => layout = x, 
-        Err(y) => panic!("Layout Error: {}", y)
+        Ok(x) => layout = x,
+        Err(y) => panic!("Layout Error: {}", y),
     };
 
     unsafe {
@@ -70,7 +81,10 @@ pub fn sbrk() -> *mut u8 {
         println!("TRAP: SBRK SYSCALL got no free memory\n");
         return 0 as *mut u8;
     }
-    println!("TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}", req_size, addr);
+    println!(
+        "TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}",
+        req_size, addr
+    );
     return addr;
 }
 
@@ -108,7 +122,7 @@ pub unsafe fn write() -> usize {
         text.push(char);
         i += 1;
     }
-    
+
     write = text.as_str();
     println!("{:#?}", write);
     return 1;

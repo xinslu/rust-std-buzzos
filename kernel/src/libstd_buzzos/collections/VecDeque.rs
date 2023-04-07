@@ -1,18 +1,19 @@
+use crate::libstd_buzzos::syscalls::{syscall1, Sysno};
 use crate::{libstd_buzzos::memory::Box::Box, println};
-use core::ptr::{null_mut};
-use crate::{libstd_buzzos::syscalls::{syscall1, Sysno}};
+use core::ptr::null_mut;
 
-pub struct Node<T : Copy> {
+pub struct Node<T: Copy> {
     pub value: T,
     pub next: *mut Node<T>,
     pub prev: *mut Node<T>,
 }
 
-impl<T : Copy> Node<T> {
+impl<T: Copy> Node<T> {
     pub unsafe fn new(value: T) -> *mut Node<T> {
         println!("Trying to alloc");
         println!("{:#?}", core::mem::size_of::<Node<T>>());
-        let pointer = unsafe{syscall1(Sysno::Sbrk,core::mem::size_of::<Node<T>>()) as *mut Node<T>};
+        let pointer =
+            unsafe { syscall1(Sysno::Sbrk, core::mem::size_of::<Node<T>>()) as *mut Node<T> };
         (*pointer).value = value;
         (*pointer).next = null_mut();
         (*pointer).next = null_mut();
@@ -21,14 +22,13 @@ impl<T : Copy> Node<T> {
     }
 }
 
-pub struct VecDeque<T : Copy> {
+pub struct VecDeque<T: Copy> {
     pub head: *mut Node<T>,
     pub tail: *mut Node<T>,
     pub len: usize,
 }
 
-
-impl<T : Copy> VecDeque<T> {
+impl<T: Copy> VecDeque<T> {
     pub fn new() -> Self {
         VecDeque {
             head: null_mut(),
@@ -38,7 +38,7 @@ impl<T : Copy> VecDeque<T> {
     }
 
     pub unsafe fn push_front(&mut self, value: T) {
-        let mut new_node: *mut Node<T> = Node::new(value); 
+        let mut new_node: *mut Node<T> = Node::new(value);
         (*new_node).prev = null_mut();
         (*new_node).next = self.head;
 
@@ -54,7 +54,7 @@ impl<T : Copy> VecDeque<T> {
     }
 
     pub unsafe fn push_back(&mut self, value: T) {
-        let mut new_node: *mut Node<T> = Node::new(value); 
+        let mut new_node: *mut Node<T> = Node::new(value);
         (*new_node).next = null_mut();
         (*new_node).prev = self.tail;
 
@@ -77,9 +77,9 @@ impl<T : Copy> VecDeque<T> {
         let value = (*self.head).value;
         self.head = (*self.head).next;
         (*self.head).prev = null_mut();
-        
+
         if (*self.head).next == null_mut() {
-            self.tail = self.head; 
+            self.tail = self.head;
         }
 
         self.len -= 1;
@@ -95,7 +95,7 @@ impl<T : Copy> VecDeque<T> {
         let value = (*self.tail).value;
         self.tail = (*self.tail).prev;
         (*self.tail).prev = null_mut();
-        
+
         if (*self.tail).prev == null_mut() {
             self.head = null_mut();
         }
