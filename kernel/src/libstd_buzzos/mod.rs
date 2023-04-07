@@ -39,6 +39,7 @@ pub mod testing {
         // }
         vector_tests();
         deque_tests();
+        string_tests();
     }   
 
     // Tests basic vector initialization with push/pop/clear
@@ -65,7 +66,10 @@ pub mod testing {
 
     // Tests basic string initialization
     pub unsafe fn string_tests() {
-        let string: String = String::new();
+        let string2: String = String::from("Hello World!");
+        println!("Len: {:#?}", string2.len());
+        println!("Char 1: {:#?}", string2.get_char_at(1));
+
     }
 
     // Tests basic Deque initialization 

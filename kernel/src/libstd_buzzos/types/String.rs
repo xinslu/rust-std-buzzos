@@ -1,3 +1,5 @@
+use alloc::borrow::ToOwned;
+
 use crate::libstd_buzzos::collections::Vec::Vec;
 use crate::libstd_buzzos::memory::Box::Box;
 
@@ -131,6 +133,26 @@ impl String {
         self.vec.push(ch as u8)
     }
 
+    /// Appends the given [`char`] to the end of this `String`.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// let mut s = String::from("abc");
+    ///
+    /// s.push('1');
+    /// s.push('2');
+    /// s.push('3');
+    ///
+    /// assert_eq!("abc123", s);
+    /// ```
+    #[inline]
+    pub fn get_char_at(&self, index: usize) -> char {
+        self.vec.get(index) as char
+    }
+
     // /// Removes the last character from the string buffer and returns it.
     // ///
     // /// Returns [`None`] if this `String` is empty.
@@ -217,6 +239,18 @@ impl String {
         self.len() == 0
     }
 
-    
+    /// Converts a `&str` into a [`String`].
+    ///
+    /// The result is allocated on the heap.
+    #[inline]
+    pub fn from(s: &str) -> String {
+        let mut vec: Vec<u8> =  Vec::with_capacity(s.len());
+        let mut i = 0;
+        while i < s.len() {
+            unsafe{ vec.push(*s.as_ptr().offset(i as isize)) };
+            i += 1;
+        } 
+        String { vec: vec }
+    }
 
 }

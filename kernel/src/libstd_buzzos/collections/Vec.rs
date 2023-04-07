@@ -165,6 +165,14 @@ impl<T> Vec<T> {
         }
     }
 
+    #[inline]
+    pub fn get(&self, index: usize) -> T {
+        assert!(self.len != 0, "Cannot get from zero-sized Vec!");
+        unsafe {
+            ptr::read(self.ptr().offset(index as isize))
+        }
+    }
+
     /// Clears the vector, removing all values.
     ///
     /// Note that this method has no effect on the allocated capacity
@@ -207,6 +215,10 @@ impl<T> Vec<T> {
     #[inline]
     pub fn len(&self) -> usize {
         self.len
+    }
+
+    pub fn set_ln(&mut self, new_len: usize) {
+        self.len = new_len;
     }
 
     /// Returns `true` if the vector contains no elements.
