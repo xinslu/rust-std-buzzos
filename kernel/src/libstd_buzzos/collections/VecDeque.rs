@@ -65,7 +65,7 @@ impl<T : Copy> Deque<T> {
 
     unsafe fn pop_front(&mut self) -> Option<T> {
         if self.head == null_mut() {
-            panic!("Skill issue. Why'd you pop front on an empty deque? Switch majors.");
+            panic!("Sai gae");
         }
 
         let value = (*self.head).value;
@@ -81,7 +81,7 @@ impl<T : Copy> Deque<T> {
 
     unsafe fn pop_back(&mut self) -> Option<T> {
         if self.head == null_mut() {
-            panic!("Skill issue. Why'd you pop back on an empty deque? Switch majors.");
+            panic!("Sai gae");
         }
 
         let value = (*self.tail).value;

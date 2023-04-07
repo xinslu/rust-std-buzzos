@@ -25,7 +25,7 @@ impl<T> Box<T> {
         let mem_break: *mut u8;
         mem_break = unsafe{syscall1(Sysno::Sbrk, num_bytes) as *mut u8};
         let ptr: *const T = &x;
-        unsafe{
+        unsafe {
             asm!("mov [{0}], {1}", in(reg) mem_break, in(reg) ptr, options(nomem, nostack, preserves_flags));
         }
         println!("Heap Memory: {:#?}", mem_break);

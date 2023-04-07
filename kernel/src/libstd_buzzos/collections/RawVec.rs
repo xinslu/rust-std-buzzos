@@ -37,6 +37,10 @@ impl<T> RawVec<T> {
         } else { 
             2* self.cap
         };
+
+        let new_layout = Layout::array::<T>(new_cap).unwrap();
+        assert!(new_layout.size() <= isize::MAX as usize, "Allocation too large");
+        
         // Layout::array checks that the number of bytes is <= usize::MAX,
         // but this is redundant since old_layout.size() <= isize::MAX,
         // so the `unwrap` should never fail.

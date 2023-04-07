@@ -16,6 +16,7 @@ pub mod testing {
     use super::syscalls::{syscall2, Sysno};
     use crate::libstd_buzzos::memory::Box::Box;
     use crate::libstd_buzzos::collections::Vec::Vec;
+    use crate::libstd_buzzos::types::String::String;
 
     pub unsafe fn test_syscall() {
         let text: &str = "Hello";
@@ -60,6 +61,6 @@ pub mod testing {
 
     // Tests basic string initialization
     pub unsafe fn string_tests() {
-        // let mut vector: Vec<u32> = Vec::with_capacity(10);
+        let string: String = String::new();
     }
 }
