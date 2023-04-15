@@ -12,7 +12,6 @@ pub mod syscalls;
 pub mod types;
 
 pub mod testing {
-    use core::arch::asm;
 
     use super::syscalls::{syscall2, Sysno};
     use crate::libstd_buzzos::collections::Vec::Vec;

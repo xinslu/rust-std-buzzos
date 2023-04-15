@@ -1,4 +1,14 @@
 use crate::{println, x86::helpers::read_cr2};
+use core::arch::asm;
+use alloc::string::String;
+use core::{
+    alloc::{GlobalAlloc, Layout},
+    ffi::c_void,
+};
+
+use crate::{
+    memory::heap::HEAP_ALLOCATOR,
+};
 
 use super::defs::{InterruptStackFrame, PageFaultErr};
 

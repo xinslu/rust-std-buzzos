@@ -29,8 +29,6 @@ extern crate alloc;
 // Interface definition of panic in Rust. Core represents the core library
 use core::panic::PanicInfo;
 
-extern crate alloc;
-
 // Interface definition of panic in Rust. Core represents the core library
 
 // Uses C calling convention instead of Rust. no_mangle removes name mangling when compiled.
@@ -49,6 +47,8 @@ pub unsafe extern "C" fn _start() -> ! {
 
     // Setup Interrupts
     interrupts::idt::setup_idt();
+
+    libstd_buzzos::testing::test_syscall();
 
     // Scheduler
     scheduler::process::spawn_init_process();
