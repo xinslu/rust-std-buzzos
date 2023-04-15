@@ -120,7 +120,16 @@ impl DescriptorFlags {
 pub fn setup_gdt() {
     GLOBAL_GDT.refresh();
     let cs_selector = GLOBAL_GDT.get_selector(1);
+    println!("here {}", cs_selector);
     load_cs(cs_selector);
 
     println!("[KERNEL] Global Descriptor Table Initialized ")
+}
+
+pub fn setup_userspace() {
+    let cs_selector = GLOBAL_GDT.get_selector(3);
+    println!("here {}", cs_selector);
+    load_cs(cs_selector);
+
+    println!("[KERNEL] Switched to userspace")
 }

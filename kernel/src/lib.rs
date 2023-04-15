@@ -1,6 +1,5 @@
 #![no_std]
 #![no_main]
-#![feature(mixed_integer_ops)]
 #![feature(abi_x86_interrupt)]
 #![feature(const_mut_refs)]
 #![feature(alloc_error_handler)]
@@ -45,7 +44,7 @@ pub unsafe extern "C" fn _start() -> ! {
     memory::heap::setup_heap();
     interrupts::idt::setup_idt();
 
-    libstd_buzzos::testing::test_syscall();
+    // libstd_buzzos::testing::test_syscall();
 
     loop {}
 }

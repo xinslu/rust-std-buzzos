@@ -6,6 +6,7 @@ use core::{
 };
 
 use super::defs::{InterruptStackFrame, PageFaultErr};
+
 use crate::{
     devices::console::{Console, CONSOLE},
     memory::{defs::LinkedListAllocator, heap::HEAP_ALLOCATOR},
