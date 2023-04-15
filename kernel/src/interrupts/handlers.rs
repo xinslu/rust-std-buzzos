@@ -1,18 +1,6 @@
-use alloc::string::String;
-use core::{
-    alloc::{GlobalAlloc, Layout},
-    ffi::c_void,
-    fmt,
-};
+use crate::{println, x86::helpers::read_cr2};
 
 use super::defs::{InterruptStackFrame, PageFaultErr};
-
-use crate::{
-    devices::console::{Console, CONSOLE},
-    memory::{defs::LinkedListAllocator, heap::HEAP_ALLOCATOR},
-    println,
-};
-use core::arch::asm;
 
 pub extern "x86-interrupt" fn div_by_zero_handler(frame: InterruptStackFrame) {
     println!("EXCEPTION: DIVISION BY ZERO\n{:#?}", frame);
@@ -23,15 +11,13 @@ pub extern "x86-interrupt" fn breakpoint_handler(frame: InterruptStackFrame) {
 }
 
 pub extern "x86-interrupt" fn page_fault(frame: InterruptStackFrame, _error_code: PageFaultErr) {
-    let addr: u32;
-    unsafe {
-        asm!(
-            "mov {}, cr2",
-            out(reg) addr,
-        );
-    };
-    println!("Page Fault at virtual address: {:#x?}", addr);
-    panic!("EXCEPTION: PAGE FAULT\n{:#?}", frame);
+    // println!();
+    panic!(
+        "[FATAL] Page Fault - eip: 0x{:X} - cr2: 0x{:X}",
+        frame.instruction_pointer,
+        read_cr2()
+    );
+    // println!("EXCEPTION: PAGE FAULT\n{:#?}", frame);
 }
 
 pub extern "x86-interrupt" fn non_maskable(frame: InterruptStackFrame) {
@@ -51,10 +37,7 @@ pub extern "x86-interrupt" fn double_fault_handler(frame: InterruptStackFrame, _
 }
 
 pub extern "x86-interrupt" fn gen_protection_fault(frame: InterruptStackFrame, _err: u32) {
-    panic!(
-        "EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}, error code: {_err:#b}",
-        frame
-    );
+    panic!("EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}", frame);
 }
 
 pub fn sbrk() -> *mut u8 {
