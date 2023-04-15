@@ -18,7 +18,6 @@ pub fn lcr3(page_dir: usize) {
 
 #[inline]
 pub fn lidt(idt: &InterruptDescriptorTablePointer) {
-    println!("{:#?}", idt);
     unsafe {
         asm!("lidt [{}]", in(reg) idt, options(readonly, nostack, preserves_flags));
     }
@@ -51,7 +50,7 @@ pub unsafe fn lgdt(gdt: &GlobalDescriptorTablePointer) {
 #[inline]
 pub fn load_cs(sel: u16) {
     unsafe {
-        asm!("pushl {0:e}; \
+        asm!("pushl {}; \
         pushl $1f; \
         lretl; \
         1:", in(reg) sel as u32, options(att_syntax));
@@ -138,5 +137,25 @@ pub fn stosb(address: usize, value: u8, length: usize) {
 pub fn int3() {
     unsafe {
         asm!("int3", options(nomem, nostack));
+    }
+}
+
+
+/// Switch to usespace
+#[inline]
+pub fn switch() {
+    unsafe {
+        asm!("mov ax, (4 * 8) | 3;\
+    mov ds, ax; \
+	mov es, axl \
+	mov fs, ax; \
+	mov gs, ax; \
+	mov eax, esp; \
+	push (4 * 8) | 3; \
+	push eax; \
+	pushf; \
+	push (3 * 8) | 3; \
+",
+            options(nomem, nostack));
     }
 }
