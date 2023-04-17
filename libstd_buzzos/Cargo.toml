@@ -1,0 +1,12 @@
+[package]
+name = "std_buzzos"
+version = "0.1.0"
+repository  = "https://github.com/xinslu/libstd-buzzos"
+edition = "2021"
+
+
+[dependencies]
+volatile = "0.2.6"
+
+[lib]
+crate-type = ["staticlib", "rlib"]
