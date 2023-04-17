@@ -28,6 +28,7 @@ lazy_static! {
     static ref SYSTEM_CALLS: [usize; NUM_SYS_CALLS] = {
         let panic_handler_address = panic_undefined_syscall as *const () as usize;
         let mut sys_calls = [panic_handler_address; NUM_SYS_CALLS];
+        print_trapframe();
 
         sys_calls[SBRK] = sbrk as *const () as usize;
         sys_calls[WRITE] = write as *const () as usize;
@@ -61,7 +62,7 @@ pub fn handle_system_call(trapframe: &TrapFrame) {
 
         mov eax, ebx
         call eax
-        
+
         popa
         ",
             trapframe = in(reg) trapframe as *const TrapFrame as usize,
@@ -75,7 +76,8 @@ pub fn print_trapframe() {
     println!("{:#?}", unsafe { (*trapframe).clone() });
 }
 
-pub fn sbrk() -> *mut u8 {
+pub fn sbrk() {
+    println!("[KERNEL] SBRK called");
     let mut res: usize = 0;
     let mut req_size: usize = 0;
     let mut addr: *mut u8;
@@ -89,7 +91,13 @@ pub fn sbrk() -> *mut u8 {
     let layout: Layout;
     match Layout::from_size_align(req_size, 4) {
         Ok(x) => layout = x,
-        Err(y) => panic!("Layout Error: {}", y),
+        Err(y) => {
+            println!("[KERNEL] Layout Error: {}", y);
+            unsafe {
+                asm!("mov eax, 0");
+            };
+            return;
+        }
     };
 
     unsafe {
@@ -97,29 +105,38 @@ pub fn sbrk() -> *mut u8 {
     };
 
     if addr.is_null() {
-        println!("TRAP: SBRK SYSCALL got no free memory\n");
-        return 0 as *mut u8;
+        println!("[KERNEL] SBRK got no free memory\n");
+        unsafe {
+            asm!("mov eax, 0");
+        };
     }
     println!(
-        "TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}",
+        "[KERNEL] SBRK got {:#?} bytes starting at {:#x?}",
         req_size, addr
     );
-    return addr;
+    unsafe {
+        asm!(
+            "mov eax, {}",
+            in(reg) addr,
+        );
+    };
 }
 
-pub fn read(fd: usize, buf: *mut c_void, count: usize) -> usize {
-    println!("read called");
+pub fn read(fd: usize, buf: *mut c_void, count: usize) {
+    println!("[KERNEL] READ called");
     let mut res: usize = 0;
     if count == 0 {
-        res = 1;
-        return res;
+        unsafe {
+            asm!("mov eax, 1");
+        };
     }
-    println!("TRAP: SYSREAD");
-    res
+    unsafe {
+        asm!("mov eax, 1");
+    };
 }
 
-pub unsafe fn write() -> usize {
-    println!("write called");
+pub unsafe fn write() {
+    println!("[KERNEL] WRITE called");
     let letter: *const u8;
     let mut len: usize = 0;
     asm!(
@@ -135,6 +152,7 @@ pub unsafe fn write() -> usize {
         unsafe {
             asm!("mov eax, 0");
         };
+        return;
     }
 
     let mut i: isize = 0;
@@ -148,5 +166,8 @@ pub unsafe fn write() -> usize {
 
     write = text.as_str();
     println!("{:#?}", write);
-    return 1;
+    unsafe {
+        asm!("mov eax, 1");
+    };
 }
+
