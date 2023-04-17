@@ -1,5 +1,4 @@
 use crate::{println, x86::helpers::read_cr2};
-use core::arch::asm;
 use alloc::string::String;
 use core::{
     alloc::{GlobalAlloc, Layout},
@@ -9,8 +8,16 @@ use core::{
 use crate::{
     memory::heap::HEAP_ALLOCATOR,
 };
+use core::arch::asm;
 
-use super::defs::{InterruptStackFrame, PageFaultErr};
+use crate::{
+    scheduler::{defs::process::TrapFrame, scheduler::SCHEDULER},
+};
+
+use super::{
+    defs::{InterruptStackFrame, PageFaultErr},
+    system_call::handle_system_call,
+};
 
 pub extern "x86-interrupt" fn div_by_zero_handler(frame: InterruptStackFrame) {
     println!("EXCEPTION: DIVISION BY ZERO\n{:#?}", frame);
@@ -21,13 +28,11 @@ pub extern "x86-interrupt" fn breakpoint_handler(frame: InterruptStackFrame) {
 }
 
 pub extern "x86-interrupt" fn page_fault(frame: InterruptStackFrame, _error_code: PageFaultErr) {
-    // println!();
     panic!(
         "[FATAL] Page Fault - eip: 0x{:X} - cr2: 0x{:X}",
         frame.instruction_pointer,
         read_cr2()
     );
-    // println!("EXCEPTION: PAGE FAULT\n{:#?}", frame);
 }
 
 pub extern "x86-interrupt" fn non_maskable(frame: InterruptStackFrame) {
@@ -120,4 +125,24 @@ pub unsafe fn write() -> usize {
     write = text.as_str();
     println!("{:#?}", write);
     return 1;
+}
+// User System Call Interrupt Handlers
+
+#[inline]
+pub extern "x86-interrupt" fn user_interrupt_switch(frame: InterruptStackFrame) {
+    unsafe {
+        // Backup the current context and trapframe of the process. This will later be
+        // restored once the trap is finished.
+        asm!("jmp trap_enter", options(nomem, nostack, preserves_flags));
+    }
+}
+
+#[no_mangle]
+extern "C" fn user_interrupt_handler(trapframe: &mut TrapFrame) {
+    if trapframe.trap_number == 64 {
+        unsafe {
+            SCHEDULER.lock().set_trapframe(trapframe as *mut TrapFrame);
+        }
+        handle_system_call(trapframe);
+    }
 }

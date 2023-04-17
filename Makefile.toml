@@ -1,9 +1,8 @@
-# Better Documentation
-# Manual for Students
-# Brush-Up C Concepts (Questions about Pointers)
-# Virtual Memory + Copy-On-Write
-
 [env]
+USER_PROGRAMS = """
+user/init
+user/test
+"""
 KERNEL_FILES = """
 entry.o
 switch.o
@@ -44,6 +43,18 @@ script = [
     "rm ../build/boot.elf",
 ]
 
+[tasks.build_user]
+dependencies = ["clean"]
+workspace = false
+script = [
+    "cd user",
+    "cargo build",
+
+    "cd ../build",
+    "mkdir user",
+    "find ../user/target/x86-target/debug/ ! -name \"*.*\" -type f -maxdepth 1 -exec cp {} ./user ';'",
+]
+
 # Build Kernel
 [tasks.build_kernel]
 dependencies = ["clean"]
@@ -81,7 +92,7 @@ script = [
 
 # Build bootloader asm files
 [tasks.build_run]
-dependencies = ["build_std", "build_kernel", "build_bootloader"] 
+dependencies = ["build_std", "build_kernel", "build_bootloader"]
 workspace = false
 script = [
     # Generate disk image
