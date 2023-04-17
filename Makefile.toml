@@ -10,6 +10,7 @@ switch.o
 kernel.o
 trap.o
 """
+
 BOOTLOADER_FILES = """
 bootloader/src/linker.ld
 build/boot.o
@@ -54,6 +55,7 @@ script = [
     "nasm -f elf32 src/boot/entry.asm -o ../build/entry.o",
     "nasm -f elf32 src/asm/switch.asm -o ../build/switch.o",
     "nasm -f elf32 src/asm/trap.asm -o ../build/trap.o",
+    "nasm -f elf32 src/asm/init.asm -o ../build/init.o",
     "nasm -f bin src/asm/init.asm -o ../build/init",
 
     "RUSTFLAGS=-g cargo build --target x86-target.json",

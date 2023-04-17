@@ -14,9 +14,7 @@
     "features": "-mmx,-sse,+soft-float",
     "pre-link-args": {
 		"gcc": [
-			"-Wl,--script=linker.ld",
-			"-Wl,--nmagic",
-			"-nostartfiles"
+			"-Wl,--script=linker.ld"
 		]
 	}
 }
