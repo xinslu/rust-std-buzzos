@@ -16,7 +16,6 @@
 
 pub mod devices;
 pub mod interrupts;
-pub mod libstd_buzzos;
 pub mod memory;
 pub mod misc;
 pub mod scheduler;
@@ -47,8 +46,6 @@ pub unsafe extern "C" fn _start() -> ! {
 
     // Setup Interrupts
     interrupts::idt::setup_idt();
-
-    libstd_buzzos::testing::test_syscall();
 
     // Scheduler
     scheduler::process::spawn_init_process();
