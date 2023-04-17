@@ -1,6 +1,16 @@
 use core::arch::asm;
 use lazy_static::lazy_static;
 
+use alloc::string::String;
+use core::{
+    alloc::{GlobalAlloc, Layout},
+    ffi::c_void,
+};
+
+use crate::{
+    memory::heap::HEAP_ALLOCATOR,
+};
+
 use crate::{
     interrupts::defs::system_call::*,
     println,
@@ -21,7 +31,9 @@ lazy_static! {
         let panic_handler_address = panic_undefined_syscall as *const () as usize;
         let mut sys_calls = [panic_handler_address; NUM_SYS_CALLS];
 
-        sys_calls[PRINT_TRAPFRAME_SYSCALL] = print_trapframe as *const () as usize;
+        sys_calls[SBRK] = sbrk as *const () as usize;
+        sys_calls[WRITE] = write as *const () as usize;
+        sys_calls[READ] = read as *const () as usize;
 
         sys_calls
     };
@@ -63,4 +75,79 @@ pub fn handle_system_call(trapframe: &TrapFrame) {
 pub fn print_trapframe() {
     let trapframe = unsafe { SCHEDULER.lock().get_trapframe().unwrap() };
     println!("{:#?}", unsafe { (*trapframe).clone() });
+}
+
+
+pub fn sbrk() -> *mut u8 {
+    let mut res: usize = 0;
+    let mut req_size: usize = 0;
+    let mut addr: *mut u8;
+    unsafe {
+        asm!(
+            "mov {}, ecx",
+            out(reg) req_size,
+        );
+    };
+
+    let layout: Layout;
+    match Layout::from_size_align(req_size, 4) {
+        Ok(x) => layout = x,
+        Err(y) => panic!("Layout Error: {}", y),
+    };
+
+    unsafe {
+        addr = HEAP_ALLOCATOR.alloc(layout);
+    };
+
+    if addr.is_null() {
+        println!("TRAP: SBRK SYSCALL got no free memory\n");
+        return 0 as *mut u8;
+    }
+    println!(
+        "TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}",
+        req_size, addr
+    );
+    return addr;
+}
+
+pub fn read(fd: usize, buf: *mut c_void, count: usize) -> usize {
+    println!("read called");
+    let mut res: usize = 0;
+    if count == 0 {
+        res = 1;
+        return res;
+    }
+    println!("TRAP: SYSREAD");
+    res
+}
+
+pub unsafe fn write() -> usize {
+    println!("write called");
+    let letter: *const u8;
+    let mut len: usize = 0;
+    asm!(
+        "mov {}, ecx",
+        out(reg) letter,
+    );
+    asm!(
+        "mov {}, edx",
+        out(reg) len,
+    );
+
+    if len == 0 {
+        return 0;
+    }
+
+    let mut i: isize = 0;
+    let mut write: &str;
+    let mut text: String = String::new();
+    while i < len as isize {
+        let char = *letter.offset(i) as char;
+        text.push(char);
+        i += 1;
+    }
+
+    write = text.as_str();
+    println!("{:#?}", write);
+    return 1;
 }

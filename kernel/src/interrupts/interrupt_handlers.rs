@@ -1,13 +1,4 @@
 use crate::{println, x86::helpers::read_cr2};
-use alloc::string::String;
-use core::{
-    alloc::{GlobalAlloc, Layout},
-    ffi::c_void,
-};
-
-use crate::{
-    memory::heap::HEAP_ALLOCATOR,
-};
 use core::arch::asm;
 
 use crate::{
@@ -55,77 +46,6 @@ pub extern "x86-interrupt" fn gen_protection_fault(frame: InterruptStackFrame, _
     panic!("EXCEPTION: GENERAL PROTECTION FAULT\n{:#?}", frame);
 }
 
-pub fn sbrk() -> *mut u8 {
-    let mut res: usize = 0;
-    let mut req_size: usize = 0;
-    let mut addr: *mut u8;
-    unsafe {
-        asm!(
-            "mov {}, ecx",
-            out(reg) req_size,
-        );
-    };
-
-    let layout: Layout;
-    match Layout::from_size_align(req_size, 4) {
-        Ok(x) => layout = x,
-        Err(y) => panic!("Layout Error: {}", y),
-    };
-
-    unsafe {
-        addr = HEAP_ALLOCATOR.alloc(layout);
-    };
-
-    if addr.is_null() {
-        println!("TRAP: SBRK SYSCALL got no free memory\n");
-        return 0 as *mut u8;
-    }
-    println!(
-        "TRAP: SBRK SYSCALL got {:#?} bytes starting at {:#x?}",
-        req_size, addr
-    );
-    return addr;
-}
-
-pub fn read(fd: usize, buf: *mut c_void, count: usize) -> usize {
-    let mut res: usize = 0;
-    if count == 0 {
-        res = 1;
-        return res;
-    }
-    println!("TRAP: SYSREAD");
-    res
-}
-
-pub unsafe fn write() -> usize {
-    let letter: *const u8;
-    let mut len: usize = 0;
-    asm!(
-        "mov {}, ecx",
-        out(reg) letter,
-    );
-    asm!(
-        "mov {}, edx",
-        out(reg) len,
-    );
-
-    if len == 0 {
-        return 0;
-    }
-
-    let mut i: isize = 0;
-    let mut write: &str;
-    let mut text: String = String::new();
-    while i < len as isize {
-        let char = *letter.offset(i) as char;
-        text.push(char);
-        i += 1;
-    }
-
-    write = text.as_str();
-    println!("{:#?}", write);
-    return 1;
-}
 // User System Call Interrupt Handlers
 
 #[inline]

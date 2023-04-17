@@ -123,10 +123,7 @@ impl IDT {
             vmm_communication_exception: Gate::empty(),
             security_exception: Gate::empty(),
             reserved_3: Gate::empty(),
-            sys_sbrk: Gate::empty(),
-            sys_read: Gate::empty(),
-            sys_write: Gate::empty(),
-            gp_interrupts: [Gate::empty(); 256 - 35],
+            gp_interrupts: [Gate::empty(); 256 - 32],
         }
     }
 

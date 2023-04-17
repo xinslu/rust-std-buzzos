@@ -3,7 +3,7 @@ section .text.init
 bits 32
 init_start:
     ; System Call Number
-    mov eax, 0x0
+    mov eax, 0x2
 
     ; 4 Parameters
     mov ecx, 0x3
