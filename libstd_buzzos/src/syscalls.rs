@@ -1,4 +1,4 @@
-use core::{arch::asm, ffi::c_void};
+use core::{arch::asm};
 
 #[derive(Copy, Clone)]
 pub enum Sysno {
@@ -55,7 +55,7 @@ pub unsafe fn syscall3(n: Sysno, arg1: usize, arg2: usize, arg3: usize) -> usize
         inlateout("eax") n as usize => ret,
         in("ecx") arg1,
         in("edx") arg2,
-        in("esi") arg3,
+        in("edi") arg3,
         options(nostack, preserves_flags));
     ret
 }

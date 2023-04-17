@@ -7,9 +7,7 @@ use core::{
     ffi::c_void,
 };
 
-use crate::{
-    memory::heap::HEAP_ALLOCATOR,
-};
+use crate::memory::heap::HEAP_ALLOCATOR;
 
 use crate::{
     interrupts::defs::system_call::*,
@@ -77,7 +75,6 @@ pub fn print_trapframe() {
     println!("{:#?}", unsafe { (*trapframe).clone() });
 }
 
-
 pub fn sbrk() -> *mut u8 {
     let mut res: usize = 0;
     let mut req_size: usize = 0;
@@ -135,7 +132,9 @@ pub unsafe fn write() -> usize {
     );
 
     if len == 0 {
-        return 0;
+        unsafe {
+            asm!("mov eax, 0");
+        };
     }
 
     let mut i: isize = 0;
