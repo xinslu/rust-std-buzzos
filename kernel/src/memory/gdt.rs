@@ -163,11 +163,3 @@ pub fn setup_userspace() {
 
     println!("[KERNEL] Switched to userspace")
 }
-
-pub fn setup_userspace() {
-    let cs_selector = GLOBAL_GDT.get_selector(3);
-    println!("here {}", cs_selector);
-    load_cs(cs_selector);
-
-    println!("[KERNEL] Switched to userspace")
-}
