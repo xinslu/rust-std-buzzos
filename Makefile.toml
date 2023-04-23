@@ -66,7 +66,6 @@ script = [
     "nasm -f elf32 src/boot/entry.asm -o ../build/entry.o",
     "nasm -f elf32 src/asm/switch.asm -o ../build/switch.o",
     "nasm -f elf32 src/asm/trap.asm -o ../build/trap.o",
-    "nasm -f elf32 src/asm/init.asm -o ../build/init.o",
     "nasm -f bin src/asm/init.asm -o ../build/init",
 
     "RUSTFLAGS=-g cargo build --target x86-target.json",
@@ -85,7 +84,7 @@ script = [
     "cd libstd_buzzos",
 
     # Compile stdlib and move to build Kernel
-    "RUSTFLAGS='-g -C prefer-dynamic' cargo build --target x86-target.json -Z build-std=core,alloc",
+    "RUSTFLAGS='-g' cargo build --target x86-target.json -Z build-std=core,alloc",
 
     "cd ..; cp target/x86-target/debug/libstd_buzzos.a build/std.o",
 ]

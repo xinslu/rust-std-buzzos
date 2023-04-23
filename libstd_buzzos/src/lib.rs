@@ -30,7 +30,8 @@ use core::panic::PanicInfo;
 // use crate::memory::Box::Box;
 // use crate::memory::Clone::Clone;
 // use crate::types::String::String;
-
+//
+#[link_section = ".text.std"]
 #[no_mangle]
 pub unsafe extern "C" fn _test_syscall() {
     // let text: &str = "Hello";
