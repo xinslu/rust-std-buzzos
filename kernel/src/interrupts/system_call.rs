@@ -170,4 +170,3 @@ pub unsafe fn write() {
         asm!("mov eax, 1");
     };
 }
-

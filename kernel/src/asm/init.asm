@@ -6,7 +6,7 @@ init_start:
     mov eax, 0x0
 
     ; 4 Parameters
-    mov ecx, 0xA
+    mov ecx, 0xa
     mov edx, 0x2
     mov esi, 0x1
     mov edi, 0x0
