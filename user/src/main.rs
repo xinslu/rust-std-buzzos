@@ -1,9 +1,9 @@
-#![no_std]
-#![no_main]
+#![feature(restricted_std)]
 
-use core::panic::PanicInfo;
+use core::unimplemented;
+extern crate std;
 
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
+
+fn main() {
+    String::new("bruh");
 }

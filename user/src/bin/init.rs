@@ -1,7 +1,4 @@
-#![no_std]
-#![no_main]
-
-use 
-
-/// Init main
-fn init_process() {}
+#![feature(restricted_std)]
+fn main() {
+    unimplemented!();
+}

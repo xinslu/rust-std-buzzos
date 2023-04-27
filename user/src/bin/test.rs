@@ -1,13 +1,10 @@
-#![no_std]
-#![no_main]
-
-use core::panic::PanicInfo;
+#![feature(restricted_std)]
 
 fn init_process() {
     loop {}
 }
 
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
+
+fn main() {
+    unimplemented!();
 }

@@ -9,6 +9,7 @@ use super::defs::{
     scheduler::Scheduler,
 };
 
+
 pub static mut PROCESS_LIST: Mutex<HeapLinkedList<Process>> = Mutex::new(HeapLinkedList::new());
 pub static mut SCHEDULER: Mutex<Scheduler> = Mutex::new(Scheduler::new());
 
@@ -51,6 +52,7 @@ impl Scheduler {
                 &self.context as *const usize as usize,
                 process_context as usize,
             );
+
         };
 
         Some(())

@@ -73,7 +73,7 @@ SECTIONS {
 
 	PROVIDE(KERNEL_END = .);
 
-	/DISCARD/ : {
-		*(.eh_frame .note.GNU-stack)
-	}
+	/* /DISCARD/ : { */
+	/* 	*(.eh_frame .note.GNU-stack) */
+	/* } */
 }

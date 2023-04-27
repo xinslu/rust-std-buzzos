@@ -1,5 +1,5 @@
 [package]
-name = "std_buzzos"
+name = "std"
 version = "0.1.0"
 repository  = "https://github.com/xinslu/libstd-buzzos"
 edition = "2021"
@@ -9,4 +9,4 @@ edition = "2021"
 volatile = "0.2.6"
 
 [lib]
-crate-type = ["staticlib", "rlib"]
+crate-type = ["staticlib"]
