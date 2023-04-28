@@ -1,14 +1,15 @@
-# Better Documentation
-# Manual for Students
-# Brush-Up C Concepts (Questions about Pointers)
-# Virtual Memory + Copy-On-Write
-
 [env]
-KERNEL_FILES = """
-kernel/src/boot/linker.ld
-build/entry.o
-build/kernel.a
+USER_PROGRAMS = """
+user/init
+user/test
 """
+KERNEL_FILES = """
+entry.o
+switch.o
+kernel.o
+trap.o
+"""
+
 BOOTLOADER_FILES = """
 bootloader/src/linker.ld
 build/boot.o
@@ -29,14 +30,17 @@ dependencies = ["clean"]
 workspace = false
 script = [
     "cd bootloader",
-    
+
     # Compile Bootloader binaries
     "nasm -f elf32 src/boot.asm -o ../build/boot.elf",
-    
+
     # Set ELF at origin address
     "ld -e _start_16 -Ttext=0x7C00 -b elf32-i386 -m elf_i386 --oformat binary -o ../build/boot.bin ../build/boot.elf",
     "ld -e _start_16 -Ttext=0x7C00 -b elf32-i386 -m elf_i386 --oformat elf32-i386 -o ../build/bootloader.elf ../build/boot.elf",
     "objdump -S ../build/bootloader.elf > ../build/boot.asm",
+    "objdump -S ../build/kernel.elf > ../build/kernel.asm",
+    "objdump -S ../build/std.o > ../build/std.asm",
+    "objdump -S ../build/user > ../build/user.asm",
     "rm ../build/boot.elf",
 ]
 
@@ -49,43 +53,62 @@ script = [
 
     # Compile Kernel and move to build Kernel
     "nasm -f elf32 src/boot/entry.asm -o ../build/entry.o",
+    "nasm -f elf32 src/asm/switch.asm -o ../build/switch.o",
+    "nasm -f elf32 src/asm/trap.asm -o ../build/trap.o",
+    "nasm -f bin src/asm/init.asm -o ../build/init",
+
     "RUSTFLAGS=-g cargo build --target x86-target.json",
-    "cd ..; cp target/x86-target/debug/libbuzz_os_kernel.a build/kernel.a",
-    
+    "cd ..; cp target/x86-target/debug/libbuzz_os_kernel.a build/kernel.o",
+
     # Link Kernel binaries
-    "ld -n -o build/kernel.elf -T ${KERNEL_FILES}",
-    "rm build/kernel.a build/entry.o"
+    "cd build",
+    "ld -n -T ../kernel/src/boot/linker.ld -o kernel.elf std.o ${KERNEL_FILES} -b binary init",
+    "rm kernel.o entry.o"
 ]
 
 [tasks.build_std]
 dependencies = ["clean"]
 workspace = false
 script = [
-    "cd libstd-buzzos",
+    "cd libstd_buzzos",
 
     # Compile stdlib and move to build Kernel
-    "RUSTFLAGS=-g cargo build --target x86-target.json -Z build-std=core",
-    
+    "RUSTFLAGS=-g cargo build --target x86-target.json -Z build-std=core,alloc,panic_abort",
+
+    "cd ..; cp target/x86-target/debug/libstd_buzzos.a build/std.o",
+]
+
+[tasks.build_user]
+dependencies = ["clean"]
+workspace = false
+script = [
+    "cd user",
+
+    # Compile stdlib and move to build Kernel
+    "RUSTFLAGS=-g cargo +nightly build --target x86-target.json -Zbuild-std=core,alloc,panic_abort",
+
+    "cp ./target/x86-target/debug/user ../build/user",
 ]
 
 # Build bootloader asm files
 [tasks.build_run]
-dependencies = ["build_kernel", "build_bootloader"]
+dependencies = ["build_std", "build_kernel", "build_user", "build_bootloader"]
 workspace = false
 script = [
     # Generate disk image
     "dd if=/dev/zero of=build/buzz.img count=10000 status=none",
     "dd if=build/boot.bin of=build/buzz.img conv=notrunc status=none",
     "dd if=build/kernel.elf of=build/buzz.img seek=1 conv=notrunc status=none",
+    "dd if=build/std.o of=build/buzz.img oflag=append conv=notrunc status=none",
     "rm build/boot.bin",
-    
+
     # Start OS
     "qemu-system-i386 -nographic -drive file=build/buzz.img,index=0,media=disk,format=raw -no-shutdown -no-reboot -m 512",
 ]
 
 # Build bootloader asm files
 [tasks.gdb]
-dependencies = ["build_kernel", "build_bootloader"]
+dependencies = ["build_std", "build_kernel", "build_bootloader"]
 workspace = false
 script = [
     # Generate disk image
@@ -93,7 +116,7 @@ script = [
     "dd if=build/boot.bin of=build/buzz.img conv=notrunc status=none",
     "dd if=build/kernel.elf of=build/buzz.img seek=1 conv=notrunc status=none",
     "rm build/boot.bin",
-    
+
     # Start OS
     "qemu-system-i386 -s -S -drive file=build/buzz.img,index=0,media=disk,format=raw -no-reboot -no-shutdown -nographic -serial mon:stdio -m 512",
 ]

@@ -1,6 +1,17 @@
 use bitflags::bitflags;
 use core::marker::PhantomData;
 
+/// System Call Constants (system_call.rs)
+
+pub mod system_call {
+    pub const NUM_SYS_CALLS: usize = 3;
+
+    /// System Call Numbers
+    pub const SBRK: usize = 0;
+    pub const WRITE: usize = 1;
+    pub const READ: usize = 2;
+}
+
 /// Structure of a pointer to a IDT. Must be passed in this format
 /// to a lidt call.
 #[derive(Debug, Clone, Copy)]
@@ -57,7 +68,7 @@ pub struct IDT {
     pub machine_check: Gate<InterruptHandler>,
     pub simd_floating_point: Gate<InterruptHandler>,
     pub virtualization: Gate<InterruptHandler>,
-    pub cp_protection_exception: Gate<InterruptHandlerWithErr>,
+    pub control_protection_exception: Gate<InterruptHandlerWithErr>,
 
     pub reserved_2: [Gate<InterruptHandler>; 6],
 
@@ -68,10 +79,7 @@ pub struct IDT {
     pub reserved_3: Gate<InterruptHandler>,
 
     /// Those can be defined by the OS (Notice 0 to 31 are already used by the processor)
-    pub sys_sbrk: Gate<TrapHandler>,
-    pub sys_read: Gate<TrapHandler>,
-    pub sys_write: Gate<TrapHandler>,
-    pub gp_interrupts: [Gate<InterruptHandler>; 256 - 35],
+    pub gp_interrupts: [Gate<InterruptHandler>; 256 - 32],
 }
 
 /// Gate Flags. Those allow fine grain control of how and when should traps/interrupts be issued.

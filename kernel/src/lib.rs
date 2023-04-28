@@ -16,16 +16,17 @@
 
 pub mod devices;
 pub mod interrupts;
-pub mod libstd_buzzos;
 pub mod memory;
 pub mod misc;
+pub mod scheduler;
 pub mod structures;
 pub mod threading;
 pub mod x86;
 
-use core::panic::PanicInfo;
-
 extern crate alloc;
+
+// Interface definition of panic in Rust. Core represents the core library
+use core::panic::PanicInfo;
 
 // Interface definition of panic in Rust. Core represents the core library
 
@@ -42,11 +43,16 @@ pub unsafe extern "C" fn _start() -> ! {
     memory::vm::setup_vm();
     memory::gdt::setup_gdt();
     memory::heap::setup_heap();
+
+    // Setup Interrupts
     interrupts::idt::setup_idt();
 
-    // libstd_buzzos::testing::test_syscall();
+    // Scheduler
+    scheduler::process::spawn_init_process();
+    scheduler::scheduler::setup_scheduler();
 
-    loop {}
+    // Should never proceeed
+    panic!("[FATAL] Returned from Scheduler");
 }
 
 // Once the Kernel panics, enter an infinite loop

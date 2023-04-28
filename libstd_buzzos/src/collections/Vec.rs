@@ -1,4 +1,4 @@
-use crate::libstd_buzzos::collections::RawVec::RawVec;
+use crate::collections::RawVec::RawVec;
 use core::ptr::{self};
 
 #[derive(Clone)]

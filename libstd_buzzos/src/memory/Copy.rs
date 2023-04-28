@@ -1,4 +1,4 @@
-use crate::libstd_buzzos::memory::Clone;
+use crate::memory::Clone;
 
 #[rustc_unsafe_specialization_marker]
 pub trait Copy: Clone::Clone {

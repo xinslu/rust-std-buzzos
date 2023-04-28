@@ -1,5 +1,4 @@
-use crate::libstd_buzzos::syscalls::{syscall1, Sysno};
-use crate::{libstd_buzzos::memory::Box::Box, println};
+use crate::syscalls::{syscall1, Sysno};
 use core::ptr::null_mut;
 
 pub struct Node<T: Copy> {
@@ -10,8 +9,8 @@ pub struct Node<T: Copy> {
 
 impl<T: Copy> Node<T> {
     pub unsafe fn new(value: T) -> *mut Node<T> {
-        println!("Trying to alloc");
-        println!("{:#?}", core::mem::size_of::<Node<T>>());
+        // println!("Trying to alloc");
+        // println!("{:#?}", core::mem::size_of::<Node<T>>());
         let pointer =
             unsafe { syscall1(Sysno::Sbrk, core::mem::size_of::<Node<T>>()) as *mut Node<T> };
         (*pointer).value = value;

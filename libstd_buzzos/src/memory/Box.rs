@@ -1,7 +1,4 @@
-use crate::{
-    libstd_buzzos::syscalls::{syscall1, Sysno},
-    println,
-};
+use crate::syscalls::{syscall1, Sysno};
 use core::{arch::asm, mem::size_of};
 
 pub struct Box<T: ?Sized>(*mut T);
@@ -29,7 +26,7 @@ impl<T> Box<T> {
         unsafe {
             asm!("mov [{0}], {1}", in(reg) mem_break, in(reg) ptr, options(nomem, nostack, preserves_flags));
         }
-        println!("Heap Memory: {:#?}", mem_break);
+        // println!("Heap Memory: {:#?}", mem_break);
         ptr
     }
 

@@ -59,7 +59,7 @@ SECTIONS {
 
 	PROVIDE(edata = .);
 
-	.bss : AT(ADDR(.bss) - 0x80000000) {
+	.bss :  {
 		*(.bss)
 	}
 
@@ -73,7 +73,7 @@ SECTIONS {
 
 	PROVIDE(KERNEL_END = .);
 
-	/DISCARD/ : {
-		*(.eh_frame .note.GNU-stack)
-	}
+	/* /DISCARD/ : { */
+	/* 	*(.eh_frame .note.GNU-stack) */
+	/* } */
 }

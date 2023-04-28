@@ -1,6 +1,5 @@
-use crate::libstd_buzzos::syscalls::{syscall1, Sysno};
-use crate::memory::heap::HEAP_ALLOCATOR;
-use core::alloc::{GlobalAlloc, Layout};
+use crate::syscalls::{syscall1, Sysno};
+use alloc::alloc::Layout;
 use core::mem::size_of;
 use core::ptr::{null_mut, NonNull};
 
@@ -67,13 +66,13 @@ impl<T> RawVec<T> {
     }
 }
 
-impl<T> Drop for RawVec<T> {
-    fn drop(&mut self) {
-        if self.cap != 0 {
-            let layout = Layout::array::<T>(self.cap).unwrap();
-            unsafe {
-                HEAP_ALLOCATOR.dealloc(self.ptr.as_ptr() as *mut u8, layout);
-            }
-        }
-    }
-}
+// impl<T> Drop for RawVec<T> {
+//     fn drop(&mut self) {
+//         if self.cap != 0 {
+//             let layout = Layout::array::<T>(self.cap).unwrap();
+//             unsafe {
+//                 HEAP_ALLOCATOR.dealloc(self.ptr.as_ptr() as *mut u8, layout);
+//             }
+//         }
+//     }
+// }
