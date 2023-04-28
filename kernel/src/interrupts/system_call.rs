@@ -129,7 +129,7 @@ pub fn read() {
     let trapframe = unsafe { *SCHEDULER.lock().get_trapframe().unwrap().clone() };
     let letter: *const u8 = trapframe.ecx as *const u8;
     let mut len: usize = trapframe.edx;
-    let fd: u8 = trapframe.edi;
+    let fd: u8 = trapframe.edi as u8;
     
     let mut res: usize = 0;
 
