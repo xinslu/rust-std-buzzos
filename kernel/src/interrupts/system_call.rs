@@ -1,5 +1,6 @@
 use core::arch::asm;
 use lazy_static::lazy_static;
+use core::fmt::Write;
 
 use alloc::string::String;
 use core::{
@@ -7,7 +8,7 @@ use core::{
     ffi::c_void,
 };
 
-use crate::memory::heap::HEAP_ALLOCATOR;
+use crate::{memory::heap::HEAP_ALLOCATOR, devices::console::CONSOLE};
 
 use crate::{
     interrupts::defs::system_call::*,
@@ -48,7 +49,7 @@ pub fn handle_system_call(trapframe: &TrapFrame) {
     }
 
     let system_call_fn = SYSTEM_CALLS[system_call_number];
-
+    let mut res: usize = 0;
     unsafe {
         asm!("
         pusha
@@ -78,15 +79,16 @@ pub fn print_trapframe() {
 
 pub fn sbrk() {
     println!("[KERNEL] SBRK called");
+    let trapframe = unsafe { *SCHEDULER.lock().get_trapframe().unwrap().clone() };
     let mut res: usize = 0;
-    let mut req_size: usize = 0;
+    let mut req_size: usize = trapframe.ecx;
     let mut addr: *mut u8;
-    unsafe {
-        asm!(
-            "mov {}, ecx",
-            out(reg) req_size,
-        );
-    };
+    // unsafe {
+    //     asm!(
+    //         "mov {}, ecx",
+    //         out(reg) req_size,
+    //     );
+    // };
 
     let layout: Layout;
     match Layout::from_size_align(req_size, 4) {
@@ -137,17 +139,20 @@ pub fn read(fd: usize, buf: *mut c_void, count: usize) {
 
 pub unsafe fn write() {
     println!("[KERNEL] WRITE called");
-    let letter: *const u8;
-    let mut len: usize = 0;
-    asm!(
-        "mov {}, ecx",
-        out(reg) letter,
-    );
-    asm!(
-        "mov {}, edx",
-        out(reg) len,
-    );
+    let trapframe = unsafe { *SCHEDULER.lock().get_trapframe().unwrap().clone() };
 
+    let letter: *const u8 = trapframe.ecx as *const u8;
+    let mut len: usize = trapframe.edx;
+    // asm!(
+    //     "mov {}, ecx",
+    //     out(reg) letter,
+    // );
+    // asm!(
+    //     "mov {}, edx",
+    //     out(reg) len,
+    // );
+
+    // Switches between printing methods
     if len == 0 {
         unsafe {
             asm!("mov eax, 0");
@@ -165,7 +170,9 @@ pub unsafe fn write() {
     }
 
     write = text.as_str();
-    println!("{:#?}", write);
+
+    CONSOLE.lock().write_fmt(format_args!("{}\n", write)).unwrap();
+
     unsafe {
         asm!("mov eax, 1");
     };

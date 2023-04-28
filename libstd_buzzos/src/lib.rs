@@ -20,6 +20,7 @@ pub mod collections;
 pub mod memory;
 pub mod syscalls;
 pub mod types;
+pub mod stdio;
 extern crate alloc;
 use core::panic::PanicInfo;
 

@@ -3,8 +3,8 @@ use core::{arch::asm};
 #[derive(Copy, Clone)]
 pub enum Sysno {
     Sbrk = 0,
-    Read = 1,
-    Write = 2,
+    Write = 1,
+    Read = 2,
 }
 
 const SYS_START: u32 = 0x20;
