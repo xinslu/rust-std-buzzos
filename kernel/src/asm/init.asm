@@ -2,8 +2,6 @@ global init_start
 section .text.init
 bits 32
 init_start:
-    ; System Call Number
-    mov eax, 0x0
 
     ; 4 Parameters
     mov ecx, 0x10
@@ -11,13 +9,14 @@ init_start:
     mov esi, 0x0
     mov edi, 0x0
 
-    ; Uncomment for storing string during write syscall
-    ; ; Stores string 'Z' at addr in ecx reg
-    ; mov esi, 0x5A
-    ; mov [ecx], esi
-    
-    ; User System Calls Trap Number
+    ; Print Trapframe
+    mov eax, 0x0
     int 64
 
-end:
-    jmp end
+    ; Yield Process
+    mov eax, 0x4
+    int 64
+
+    ; Exit Process
+    mov eax, 0x5
+    int 64

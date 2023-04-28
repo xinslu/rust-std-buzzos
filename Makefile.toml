@@ -39,8 +39,7 @@ script = [
     "ld -e _start_16 -Ttext=0x7C00 -b elf32-i386 -m elf_i386 --oformat elf32-i386 -o ../build/bootloader.elf ../build/boot.elf",
     "objdump -S ../build/bootloader.elf > ../build/boot.asm",
     "objdump -S ../build/kernel.elf > ../build/kernel.asm",
-    "objdump -S ../build/std.o > ../build/std.asm",
-    "objdump -S ../build/user > ../build/user.asm",
+    # "objdump -S ../build/std.o > ../build/std.asm",
     "rm ../build/boot.elf",
 ]
 
@@ -62,7 +61,7 @@ script = [
 
     # Link Kernel binaries
     "cd build",
-    "ld -n -T ../kernel/src/boot/linker.ld -o kernel.elf std.o ${KERNEL_FILES} -b binary init",
+    "ld -n -T ../kernel/src/boot/linker.ld -o kernel.elf ${KERNEL_FILES} -b binary init",
     "rm kernel.o entry.o"
 ]
 
@@ -85,21 +84,21 @@ script = [
     "cd user",
 
     # Compile stdlib and move to build Kernel
-    "RUSTFLAGS=-g cargo +nightly build --target x86-target.json -Zbuild-std=core,alloc,panic_abort",
+    "RUSTFLAGS=-g cargo +nightly build --target x86-target.json -Z build-std=core,alloc,panic_abort",
 
     "cp ./target/x86-target/debug/user ../build/user",
 ]
 
 # Build bootloader asm files
 [tasks.build_run]
-dependencies = ["build_std", "build_kernel", "build_user", "build_bootloader"]
+dependencies = ["build_kernel", "build_user", "build_bootloader"]
 workspace = false
 script = [
     # Generate disk image
     "dd if=/dev/zero of=build/buzz.img count=10000 status=none",
     "dd if=build/boot.bin of=build/buzz.img conv=notrunc status=none",
     "dd if=build/kernel.elf of=build/buzz.img seek=1 conv=notrunc status=none",
-    "dd if=build/std.o of=build/buzz.img oflag=append conv=notrunc status=none",
+    # "dd if=build/std.o of=build/buzz.img oflag=append conv=notrunc status=none",
     "rm build/boot.bin",
 
     # Start OS

@@ -13,6 +13,7 @@
 #![feature(rustc_attrs)]
 #![feature(never_type)]
 #![feature(lang_items)]
+#![feature(prelude_import)]
 #![default_lib_allocator]
 #[macro_use]
 
@@ -24,6 +25,16 @@ pub mod stdio;
 extern crate alloc;
 use core::panic::PanicInfo;
 
+#[prelude_import]
+pub use prelude::rust_2018::*;
+
+pub mod prelude {
+    pub mod rust_2018 {
+        pub use crate::collections::Vec;
+        pub use core::prelude::v1::*;
+    }
+}
+
 // use super::syscalls::{syscall2, Sysno};
 // use crate::collections::Vec::Vec;
 // use crate::collections::VecDeque::VecDeque;
@@ -31,7 +42,6 @@ use core::panic::PanicInfo;
 // use crate::memory::Clone::Clone;
 // use crate::types::String::String;
 //
-#[link_section = ".text.std"]
 #[no_mangle]
 pub unsafe extern "C" fn _test_syscall() {
     // let text: &str = "Hello";
