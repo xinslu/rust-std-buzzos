@@ -124,17 +124,16 @@ pub fn sbrk() {
     };
 }
 
-pub fn read(fd: usize, buf: *mut c_void, count: usize) {
+pub fn read() {
     println!("[KERNEL] READ called");
+    let trapframe = unsafe { *SCHEDULER.lock().get_trapframe().unwrap().clone() };
+    let letter: *const u8 = trapframe.ecx as *const u8;
+    let mut len: usize = trapframe.edx;
+    let fd: u8 = trapframe.edi as u8;
+    
     let mut res: usize = 0;
-    if count == 0 {
-        unsafe {
-            asm!("mov eax, 1");
-        };
-    }
-    unsafe {
-        asm!("mov eax, 1");
-    };
+
+    // Can't read anything yet (no file descriptors)
 }
 
 pub unsafe fn write() {
@@ -143,14 +142,6 @@ pub unsafe fn write() {
 
     let letter: *const u8 = trapframe.ecx as *const u8;
     let mut len: usize = trapframe.edx;
-    // asm!(
-    //     "mov {}, ecx",
-    //     out(reg) letter,
-    // );
-    // asm!(
-    //     "mov {}, edx",
-    //     out(reg) len,
-    // );
 
     // Switches between printing methods
     if len == 0 {
