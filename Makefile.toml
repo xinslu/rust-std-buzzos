@@ -74,7 +74,7 @@ script = [
     # Compile stdlib and move to build Kernel
     "RUSTFLAGS=-g cargo build --target x86-target.json -Z build-std=core,alloc,panic_abort",
 
-    "cd ..; cp target/x86-target/debug/libstd_buzzos.a build/std.o",
+    "cd ..; cp target/x86-target/debug/libstd.a build/std.o",
 ]
 
 [tasks.build_user]
@@ -91,7 +91,7 @@ script = [
 
 # Build bootloader asm files
 [tasks.build_run]
-dependencies = ["build_std", "build_kernel", "build_user", "build_bootloader"]
+dependencies = ["build_std", "build_kernel", "build_bootloader"]
 workspace = false
 script = [
     # Generate disk image

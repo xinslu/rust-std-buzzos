@@ -1,11 +1,5 @@
-use alloc::borrow::ToOwned;
-
 use crate::collections::Vec::Vec;
-use crate::memory::Box::Box;
-
 use core::fmt;
-use core::ptr;
-use core::slice;
 
 #[derive(Clone)]
 pub struct String {

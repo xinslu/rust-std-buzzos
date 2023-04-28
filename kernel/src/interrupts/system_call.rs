@@ -1,5 +1,6 @@
 use core::arch::asm;
 use lazy_static::lazy_static;
+use core::fmt::Write;
 
 use alloc::string::String;
 use core::{
@@ -7,7 +8,7 @@ use core::{
     ffi::c_void,
 };
 
-use crate::memory::heap::HEAP_ALLOCATOR;
+use crate::{memory::heap::HEAP_ALLOCATOR, devices::console::CONSOLE};
 
 use crate::{
     interrupts::defs::system_call as SystemCall,
@@ -46,10 +47,12 @@ pub fn print_trapframe() {
 }
 
 pub fn _yield() {
+    println!("[KERNEL] YEILD called");
     unsafe { SCHEDULER.lock().resume() };
 }
 
 pub fn exit() {
+    println!("[KERNEL] EXIT called");
     unsafe {
         let mut scheduler = SCHEDULER.lock();
         scheduler.current_process.as_mut().unwrap().state = ProcessState::KILLED;
@@ -59,15 +62,10 @@ pub fn exit() {
 
 pub fn sbrk() {
     println!("[KERNEL] SBRK called");
+    let trapframe = unsafe { *SCHEDULER.lock().get_trapframe().unwrap().clone() };
     let mut res: usize = 0;
-    let mut req_size: usize = 0;
+    let mut req_size: usize = trapframe.ecx;
     let mut addr: *mut u8;
-    unsafe {
-        asm!(
-            "mov {}, ecx",
-            out(reg) req_size,
-        );
-    };
 
     let layout: Layout;
     match Layout::from_size_align(req_size, 4) {
@@ -105,42 +103,24 @@ pub fn sbrk() {
 
 pub fn read() {
     println!("[KERNEL] READ called");
-    let mut count: usize = 0;
+    let trapframe = unsafe { *SCHEDULER.lock().get_trapframe().unwrap().clone() };
+    let letter: *const u8 = trapframe.ecx as *const u8;
+    let mut len: usize = trapframe.edx;
+    let fd: u8 = trapframe.edi as u8;
+
     let mut res: usize = 0;
 
-    unsafe {
-        asm!(
-            "mov {}, ecx",
-            out(reg) count,
-        );
-    };
-
-    if count == 0 {
-        unsafe {
-            asm!("mov eax, 1");
-        };
-    }
-    unsafe {
-        asm!("mov eax, 1");
-    };
+    // Can't read anything yet (no file descriptors)
 }
 
 pub fn write() {
     println!("[KERNEL] WRITE called");
-    let letter: *const u8;
-    let mut len: usize = 0;
-    unsafe {
-        asm!(
-            "mov {}, ecx",
-            out(reg) letter,
-        );
+    let trapframe = unsafe { *SCHEDULER.lock().get_trapframe().unwrap().clone() };
 
-        asm!(
-            "mov {}, edx",
-            out(reg) len,
-        );
-    }
+    let letter: *const u8 = trapframe.ecx as *const u8;
+    let mut len: usize = trapframe.edx;
 
+    // Switches between printing methods
     if len == 0 {
         unsafe {
             asm!("mov eax, 0");
@@ -161,7 +141,9 @@ pub fn write() {
     }
 
     write = text.as_str();
-    println!("{:#?}", write);
+
+    CONSOLE.lock().write_fmt(format_args!("{}\n", write)).unwrap();
+
     unsafe {
         asm!("mov eax, 1");
     };

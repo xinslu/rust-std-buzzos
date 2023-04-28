@@ -11,8 +11,8 @@ pub mod system_call {
     pub const WRITE: usize = 1;
     pub const READ: usize = 2;
     pub const PRINT_TRAP_FRAME: usize = 3;
-    pub const EXIT: usize = 4;
-    pub const YIELD: usize = 5;
+    pub const YIELD: usize = 4;
+    pub const EXIT: usize = 5;
 }
 
 /// Structure of a pointer to a IDT. Must be passed in this format
