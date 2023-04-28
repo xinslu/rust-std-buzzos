@@ -40,7 +40,6 @@ script = [
     "objdump -S ../build/bootloader.elf > ../build/boot.asm",
     "objdump -S ../build/kernel.elf > ../build/kernel.asm",
     "objdump -S ../build/std.o > ../build/std.asm",
-    "objdump -S ../build/user > ../build/user.asm",
     "rm ../build/boot.elf",
 ]
 
@@ -85,7 +84,7 @@ script = [
     "cd user",
 
     # Compile stdlib and move to build Kernel
-    "RUSTFLAGS=-g cargo +nightly build --target x86-target.json -Zbuild-std=core,alloc,panic_abort",
+    "RUSTFLAGS=-g cargo +nightly build --target x86-target.json -Z build-std=core,alloc,panic_abort,std",
 
     "cp ./target/x86-target/debug/user ../build/user",
 ]

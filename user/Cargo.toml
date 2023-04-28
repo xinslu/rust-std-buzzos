@@ -16,5 +16,5 @@ panic = "abort"
 [profile.release]
 panic = "abort"
 
-[dependencies.std]
-path = "../libstd_buzzos/"
+[dependencies]
+"std" = {path = "../libstd_buzzos/"}

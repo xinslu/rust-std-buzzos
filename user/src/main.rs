@@ -1,8 +1,5 @@
-#![feature(restricted_std)]
-
 use core::unimplemented;
-extern crate std;
-
+use std::string_tests;
 
 fn main() {
     String::new("bruh");

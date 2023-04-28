@@ -10,9 +10,12 @@ use core::{
 use crate::memory::heap::HEAP_ALLOCATOR;
 
 use crate::{
-    interrupts::defs::system_call::*,
+    interrupts::defs::system_call as SystemCall,
     println,
-    scheduler::{defs::process::TrapFrame, scheduler::SCHEDULER},
+    scheduler::{
+        defs::process::ProcessState,
+        scheduler::{PROCESS_LIST, SCHEDULER},
+    },
 };
 
 /// If a call to an undefined System Call happens, panic and exit.
@@ -21,59 +24,37 @@ fn panic_undefined_syscall() {
     panic!("[FATAL] Undefined System Call");
 }
 
-lazy_static! {
-    /// Add your own System Calls here. Notice parameters use the System V ABI calling convention,
-    /// so edi, esi, edx, and ecx registers are used to pass the first four parameters to parameters.
-    /// Functions are passed as addresses in order to avoid Rust parameter validation.
-    static ref SYSTEM_CALLS: [usize; NUM_SYS_CALLS] = {
-        let panic_handler_address = panic_undefined_syscall as *const () as usize;
-        let mut sys_calls = [panic_handler_address; NUM_SYS_CALLS];
-        print_trapframe();
-
-        sys_calls[SBRK] = sbrk as *const () as usize;
-        sys_calls[WRITE] = write as *const () as usize;
-        sys_calls[READ] = read as *const () as usize;
-
-        sys_calls
+/// Every System Call passes through this handler. The trapframe is passed to facilitate loading
+/// the ABI registers and getting the system call number in eax.
+pub fn handle_system_call(number: usize, arg0: usize, arg1: usize, arg2: usize, arg3: usize) {
+    let system_call_fn = match number {
+        SystemCall::SBRK => sbrk(),
+        SystemCall::WRITE => write(),
+        SystemCall::READ => read(),
+        SystemCall::PRINT_TRAP_FRAME => print_trapframe(),
+        SystemCall::EXIT => exit(),
+        SystemCall::YIELD => _yield(),
+        _ => panic_undefined_syscall(),
     };
 }
 
-/// Every System Call passes through this handler. The trapframe is passed to facilitate loading
-/// the ABI registers and getting the system call number in eax.
-pub fn handle_system_call(trapframe: &TrapFrame) {
-    let system_call_number = trapframe.eax;
-
-    if system_call_number > NUM_SYS_CALLS - 1 {
-        panic_undefined_syscall();
-    }
-
-    let system_call_fn = SYSTEM_CALLS[system_call_number];
-
-    unsafe {
-        asm!("
-        pusha
-
-        mov eax, {trapframe}
-
-        mov edi, [eax]
-        mov esi, [eax + 4]
-        mov ecx, [eax + 24]
-        mov edx, [eax + 20]
-
-        mov eax, ebx
-        call eax
-
-        popa
-        ",
-            trapframe = in(reg) trapframe as *const TrapFrame as usize,
-            in("ebx") system_call_fn
-        );
-    }
+pub fn print_trapframe() {
+    let scheduler = unsafe { SCHEDULER.lock() };
+    let current_process = scheduler.current_process.as_ref().unwrap();
+    let trapframe = current_process.get_trapframe().unwrap();
+    println!("{:#?}", trapframe);
 }
 
-pub fn print_trapframe() {
-    let trapframe = unsafe { SCHEDULER.lock().get_trapframe().unwrap() };
-    println!("{:#?}", unsafe { (*trapframe).clone() });
+pub fn _yield() {
+    unsafe { SCHEDULER.lock().resume() };
+}
+
+pub fn exit() {
+    unsafe {
+        let mut scheduler = SCHEDULER.lock();
+        scheduler.current_process.as_mut().unwrap().state = ProcessState::KILLED;
+        scheduler.resume();
+    }
 }
 
 pub fn sbrk() {
@@ -122,9 +103,18 @@ pub fn sbrk() {
     };
 }
 
-pub fn read(fd: usize, buf: *mut c_void, count: usize) {
+pub fn read() {
     println!("[KERNEL] READ called");
+    let mut count: usize = 0;
     let mut res: usize = 0;
+
+    unsafe {
+        asm!(
+            "mov {}, ecx",
+            out(reg) count,
+        );
+    };
+
     if count == 0 {
         unsafe {
             asm!("mov eax, 1");
@@ -135,18 +125,21 @@ pub fn read(fd: usize, buf: *mut c_void, count: usize) {
     };
 }
 
-pub unsafe fn write() {
+pub fn write() {
     println!("[KERNEL] WRITE called");
     let letter: *const u8;
     let mut len: usize = 0;
-    asm!(
-        "mov {}, ecx",
-        out(reg) letter,
-    );
-    asm!(
-        "mov {}, edx",
-        out(reg) len,
-    );
+    unsafe {
+        asm!(
+            "mov {}, ecx",
+            out(reg) letter,
+        );
+
+        asm!(
+            "mov {}, edx",
+            out(reg) len,
+        );
+    }
 
     if len == 0 {
         unsafe {
@@ -159,7 +152,10 @@ pub unsafe fn write() {
     let mut write: &str;
     let mut text: String = String::new();
     while i < len as isize {
-        let char = *letter.offset(i) as char;
+        let char: char;
+        unsafe {
+            char = *letter.offset(i) as char;
+        }
         text.push(char);
         i += 1;
     }

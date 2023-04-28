@@ -154,6 +154,7 @@ pub fn setup_gdt() {
     load_cs(cs_selector);
 
     println!("[KERNEL] Global Descriptor Table Initialized ");
+    ltr(TASK_SWITCH_SEG_ENTRY << 3);
 }
 
 pub fn setup_userspace() {
