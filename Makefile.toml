@@ -98,7 +98,7 @@ script = [
     "dd if=/dev/zero of=build/buzz.img count=10000 status=none",
     "dd if=build/boot.bin of=build/buzz.img conv=notrunc status=none",
     "dd if=build/kernel.elf of=build/buzz.img seek=1 conv=notrunc status=none",
-    # "dd if=build/std.o of=build/buzz.img oflag=append conv=notrunc status=none",
+    "dd if=build/user of=build/buzz.img oflag=append conv=notrunc status=none",
     "rm build/boot.bin",
 
     # Start OS
